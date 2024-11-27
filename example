@@ -1,170 +1,178 @@
-Below is an explanation of the logic behind each output parameter, along with a practical example to illustrate how it works.
+Here’s the explanation with formulas included for easy understanding and copying:
 
 1. LIFE_IN_PROCESSING_FEE_CHARGES
 
 Logic:
-	•	This is the processing fee for life insurance, calculated based on the loan amount and LI_TYPE (e.g., Monthly, Upfront).
-	•	Formula:
-	•	Monthly: Fee is calculated monthly based on the disbursed loan amount and the loan tenor.
-	•	Upfront: Fee is calculated for the entire loan tenor in advance.
+	•	Fee is based on the loan amount and LI_TYPE (e.g., Monthly, Upfront).
+
+Formula:
+	•	Monthly:
+￼
 
 Example:
-	•	Loan Amount: OMR 100,000
-	•	LI_TYPE: Monthly
-	•	Calculation: Assume the fee is 0.5% per month:
+	•	Loan Amount: 100,000 OMR
+	•	Monthly Fee Percentage: 0.5%
 ￼
 
 2. DISBURSED_LOAN_AMOUNT
 
 Logic:
-	•	Total amount disbursed to the customer after deducting applicable fees.
-	•	Formula:
+	•	Total amount disbursed after deducting fees.
+
+Formula:
 ￼
 
 Example:
-	•	Loan Amount: OMR 100,000
-	•	Processing Fees: OMR 500
-	•	Life Insurance: OMR 2,000
-	•	Calculation:
+	•	Loan Amount: 100,000 OMR
+	•	Processing Fees: 500 OMR
+	•	Life Insurance: 2,000 OMR
 ￼
 
 3. MAX_LOAN_TENOR
 
 Logic:
-	•	Maximum allowable loan tenor based on the customer’s age and loan product.
-	•	Retrieved from the EMI_CONDITIONS table.
+	•	Maximum allowable loan tenor based on customer age.
+
+Formula:
+￼
 
 Example:
 	•	Customer Age: 45 years
 	•	Maximum Age Allowed: 60 years
-	•	Calculation: Maximum tenor:
 ￼
 
 4. MAX LOAN AMOUNT
 
 Logic:
-	•	Maximum loan amount based on the customer’s salary, DBR (Debt-to-Burden Ratio), and product type.
-	•	Formula for Salary-Based Loans:
+	•	Maximum loan amount based on salary and DBR.
+
+Formula:
 ￼
 
 Example:
-	•	Net Salary: OMR 1,500
+	•	Net Salary: 1,500 OMR
 	•	Salary Percentage: 50%
-	•	Existing Loan EMI: OMR 300
-	•	Calculation:
+	•	Existing Loan EMI: 300 OMR
 ￼
 
 5. EMI
 
 Logic:
-	•	EMI (Equated Monthly Installment) is calculated using the standard formula:
+	•	EMI (Equated Monthly Installment) is calculated using the standard EMI formula.
+
+Formula:
 ￼
 Where:
 	•	￼ Loan Amount
-	•	￼ Monthly Interest Rate
+	•	￼ Monthly Interest Rate (￼)
 	•	￼ Loan Tenor (in months)
 
 Example:
-	•	Loan Amount: OMR 100,000
+	•	Loan Amount: 100,000 OMR
 	•	Interest Rate: 6% annual (0.5% monthly)
-	•	Loan Tenor: 120 months (10 years)
-	•	Calculation:
+	•	Loan Tenor: 120 months
 ￼
 
 6. DBR%
 
 Logic:
-	•	Debt-to-Burden Ratio (DBR) represents the total EMI as a percentage of the customer’s salary.
-	•	Formula:
+	•	Represents total EMI as a percentage of salary.
+
+Formula:
 ￼
 
 Example:
-	•	Net Salary: OMR 1,500
-	•	Existing EMI: OMR 300
-	•	New EMI: OMR 800
-	•	Calculation:
+	•	Net Salary: 1,500 OMR
+	•	Existing EMI: 300 OMR
+	•	New EMI: 800 OMR
 ￼
 
 7. Total_Property_Value%
 
 Logic:
-	•	Represents the total property value for house loans:
+	•	Total property value for house loans.
+
+Formula:
 ￼
 
 Example:
-	•	Land Value: OMR 50,000
-	•	Building Value: OMR 100,000
-	•	Calculation:
+	•	Land Value: 50,000 OMR
+	•	Building Value: 100,000 OMR
 ￼
 
 8. Loan_Amount_Per_Property_Value%
 
 Logic:
-	•	Calculates the loan-to-value ratio for property loans:
+	•	Loan-to-value ratio for property loans.
+
+Formula:
 ￼
 
 Example:
-	•	Loan Amount: OMR 100,000
-	•	Total Property Value: OMR 150,000
-	•	Calculation:
+	•	Loan Amount: 100,000 OMR
+	•	Total Property Value: 150,000 OMR
 ￼
 
 9. Age Error
 
 Logic:
-	•	Triggers if the customer’s age at loan maturity exceeds the allowable age (MAX_AGE).
+	•	Triggers if age at maturity exceeds MAX_AGE.
 
 Example:
 	•	Current Age: 55 years
-	•	Loan Tenor: 120 months (10 years)
+	•	Loan Tenor: 120 months
 	•	Max Age: 60 years
-	•	Result:
 ￼
 
 10. LTV_Error
 
 Logic:
-	•	Checks if the loan-to-value ratio exceeds the maximum allowable percentage (LTV_Local).
+	•	Checks if loan-to-value exceeds the maximum percentage.
+
+Formula:
+￼
 
 Example:
-	•	Loan Amount: OMR 100,000
-	•	Total Property Value: OMR 150,000
+	•	Loan Amount: 100,000 OMR
+	•	Total Property Value: 150,000 OMR
 	•	Maximum LTV: 60%
-	•	Result:
 ￼
 
 11. Age At Maturity
 
 Logic:
-	•	Calculates the customer’s age at the end of the loan tenor.
+	•	Customer’s age at the end of the loan tenor.
+
+Formula:
+￼
 
 Example:
 	•	Current Age: 30 years
-	•	Loan Tenor: 180 months (15 years)
-	•	Calculation:
+	•	Loan Tenor: 180 months
 ￼
 
 12. Loan Processing FEE With VAT
 
 Logic:
-	•	Calculates the loan processing fee, including VAT (if applicable).
+	•	Processing fee including VAT.
+
+Formula:
+￼
 
 Example:
-	•	Processing Fee: OMR 1,000
+	•	Processing Fee: 1,000 OMR
 	•	VAT Rate: 5%
-	•	Calculation:
 ￼
 
 13. EMI START DATE and EMI END DATE
 
 Logic:
-	•	Fetches the start and end dates of EMI payments from the amortization schedule.
+	•	Dates fetched from the amortization schedule.
 
 Example:
 	•	Loan Start Date: 1st Jan 2024
 	•	Loan Tenor: 120 months
-	•	Result:
-	•	EMI Start Date: 1st Feb 2024
-	•	EMI End Date: 1st Jan 2034
+￼
+￼
 
-These calculations ensure accurate and detailed loan reporting. Let me know if you need clarification on any specific parameter!
+These formulas should now be easy to copy and reference! Let me know if you need more clarifications.
