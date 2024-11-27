@@ -1,0 +1,117 @@
+This stored procedure SP_Loan_Calculator is designed to calculate various attributes related to loan eligibility, disbursement, and associated fees for different loan products such as Auto Loans, House Loans, and Personal Loans. It validates inputs, performs extensive calculations, and generates a detailed report of loan-related attributes.
+
+Inputs and Outputs
+
+Input Parameters:
+
+These are the parameters provided by the user or system to the procedure:
+
+Parameter	Type	Description
+CUSTOMER_NAME	VARCHAR2	Customer’s full name.
+NATIONAL_ID	VARCHAR2	Customer’s national ID number.
+MOBILE_NUMBER	VARCHAR2	Customer’s contact number.
+EMAIL_ID	VARCHAR2	Customer’s email address.
+EMPLOYERNAME	VARCHAR2	Customer’s employer name.
+CHANNEL_TYPE	VARCHAR2	Channel through which the loan was requested (e.g., online, branch).
+DATE_OF_ENQUIRY	VARCHAR2	Date of loan enquiry.
+NATIONALITY	VARCHAR2	Customer’s nationality.
+EMPLOYER_SEGMENT	VARCHAR2	Employer segment/category (e.g., public, private).
+DATE_OF_BIRTH	VARCHAR2	Customer’s date of birth.
+NET_SALARY	VARCHAR2	Customer’s monthly net salary.
+IS_EXISTING_LOAN	VARCHAR2	Indicates if the customer has existing loans (YES/NO).
+EXISTING_LOAN_BANK	VARCHAR2	Name of the bank for the existing loan, if any.
+EXISTING_LOAN_AMOUNT	VARCHAR2	Outstanding amount of the existing loan.
+IS_EXISTING_LOAN_SETTLEMENT	VARCHAR2	Indicates if the existing loan is settled.
+EXISTINGLOAN_INSTALLMENT	VARCHAR2	EMI of the existing loan.
+PRODUCT	VARCHAR2	Loan product type (e.g., Auto Loan, House Loan).
+LOANTYPE	VARCHAR2	Loan type (e.g., Construction, Renovation).
+INTEREST_RATE	VARCHAR2	Interest rate for the loan.
+LI_TYPE	VARCHAR2	Life insurance type (e.g., Monthly, Upfront).
+LOAN_REQUESTED	VARCHAR2	Amount of loan requested by the customer.
+LI_PROCESSING_FEE	VARCHAR2	Processing fee for life insurance.
+IS_FIRST_BUY	VARCHAR2	Indicates if this is the customer’s first purchase (YES/NO).
+LAND_VALUE	VARCHAR2	Value of the land involved in the loan (for property loans).
+BUILDING_VALUE	VARCHAR2	Value of the building involved in the loan (for property loans).
+ISMORTGAGE_FEE	VARCHAR2	Indicates if a mortgage fee is applicable.
+ISMULKIYA_TRANSFER_FEE	VARCHAR2	Indicates if a Mulkiya transfer fee is applicable.
+ISVALUATION_FEE	VARCHAR2	Indicates if a valuation fee is applicable.
+ISPROPERTY_INSURANCE	VARCHAR2	Indicates if property insurance is applicable.
+VEHICLE_VALUE	VARCHAR2	Value of the vehicle (for auto loans).
+SALARY_ASSIGNMENT	VARCHAR2	Indicates if salary is assigned for the loan (YES/NO).
+REQUESTED_LOAN_TENOR	VARCHAR2	Loan tenor (in months) requested by the customer.
+ISEXCEPTION_CASE	VARCHAR2	Indicates if the case is an exception (YES/NO).
+REINSTATE_VALUE	VARCHAR2	Value for reinstatement (used in some loan calculations).
+INTEREST_SERVING_PERIOD	VARCHAR2	Period for which only interest is served.
+PENSIONER	VARCHAR2	Indicates if the customer is a pensioner (YES/NO).
+ISPROCESSING_FEE	VARCHAR2	Indicates if a processing fee is applicable.
+OTHER_FEE	VARCHAR2	Other applicable fees.
+IsWaiver	VARCHAR2	Indicates if there are fee waivers.
+
+Output Parameter:
+
+Parameter	Type	Description
+RESULT	SYS_REFCURSOR	Cursor returning the loan calculation results.
+
+Working Mechanism
+
+	1.	Parameter Validation:
+	•	Validates key parameters like DATE_OF_BIRTH, NET_SALARY, and REQUESTED_LOAN_TENOR to ensure the customer meets the loan eligibility criteria.
+	2.	Loan Tenor and Age Checks:
+	•	Uses the EMI_CONDITIONS table to determine:
+	•	Maximum loan tenor (MAX_LOAN_TENOR).
+	•	Minimum and maximum age (minAge and MAX_AGE).
+	•	Calculates the customer’s age in months and checks if the loan tenor exceeds the maximum permissible age.
+	3.	Interest Serving Period:
+	•	If INTEREST_SERVING_PERIOD is provided, adjusts the loan tenor to account for the period during which only interest is served.
+	4.	Eligibility Calculations:
+	•	Calculates the maximum loan amount based on the customer’s salary, product type, and other parameters.
+	•	Ensures that the loan amount requested does not exceed eligibility (maxLoanAmountPerProperty for property loans).
+	5.	Fee Calculations:
+	•	Calculates various fees based on the product and loan type:
+	•	Processing fee.
+	•	Life insurance fee (LIFE_INSURANCE).
+	•	Property-related fees (e.g., mortgage fee, valuation fee).
+	•	Applies VAT where applicable.
+	6.	Loan Disbursement:
+	•	Determines the disbursed loan amount by summing all applicable fees and the loan principal.
+	•	Adjusts the loan amount if the customer qualifies for exceptions or waivers.
+	7.	EMI and Amortization Schedule:
+	•	Calculates the EMI using the loan tenor and interest rate.
+	•	Calls SP_BUILD_LOAN_AMORTIZATION to generate the amortization schedule.
+	8.	Error Handling:
+	•	Validates all calculations and returns errors if:
+	•	Loan tenor exceeds the permissible age.
+	•	Loan-to-value (LTV) ratio is not met.
+	•	DBR (Debt-to-Burden Ratio) exceeds the limit.
+	9.	Result Compilation:
+	•	Inserts all calculated values and error messages into a temporary table (EMI_TEMP).
+	•	Returns the data via the output cursor RESULT.
+
+Report of Inputs and Outputs
+
+The output cursor RESULT includes the following key fields:
+
+Field	Description
+LIFE_IN_PROCESSING_FEE_CHARGES	Total processing fee for life insurance.
+DISBURSED_LOAN_AMOUNT	Final disbursed loan amount after fees and deductions.
+MAX_LOAN_TENOR	Maximum permissible loan tenor for the product.
+MAX LOAN AMOUNT	Maximum loan amount eligible for the customer.
+EMI	Calculated monthly installment for the loan.
+DBR%	Debt-to-burden ratio as a percentage of the customer’s salary.
+Total_Property_Value%	Total property value (for property loans).
+Loan_Amount_Per_Property_Value%	Loan-to-value ratio.
+Age Error	Error message if the customer’s age exceeds eligibility criteria.
+DBR_Error	Error message if the DBR exceeds permissible limits.
+LTV_Error	Error message if the LTV ratio exceeds permissible limits.
+Age At Maturity	Age of the customer at loan maturity.
+Loan Processing FEE With VAT	Processing fee including VAT.
+PROPERTY FEE	Total property-related fees.
+LIFE_INSURANCE FEE WITH VAT	Total life insurance fee including VAT.
+VALUATION FEE	Valuation fee for property loans.
+Mortgage FEE	Mortgage fee for property loans.
+EMI START DATE	Start date of EMI payments.
+EMI END DATE	End date of EMI payments.
+TOTAL TENOR PAID BY CUSTOMER	Total loan tenor paid by the customer.
+TOTAL TENOR INCLUDING WAIVER	Total loan tenor including any waivers.
+
+This procedure is highly parameterized, allowing customization for different loan products and customer scenarios. If further clarification is needed for specific sections or parameters, let me know!
