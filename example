@@ -1,4 +1,4 @@
-Here’s the explanation with formulas included for easy understanding and copying:
+Here’s a simplified version with all formulas written in plain text for easy copying:
 
 1. LIFE_IN_PROCESSING_FEE_CHARGES
 
@@ -6,13 +6,12 @@ Logic:
 	•	Fee is based on the loan amount and LI_TYPE (e.g., Monthly, Upfront).
 
 Formula:
-	•	Monthly:
-￼
+LIFE_IN_PROCESSING_FEE_CHARGES = Loan Amount × Monthly Fee Percentage
 
 Example:
 	•	Loan Amount: 100,000 OMR
 	•	Monthly Fee Percentage: 0.5%
-￼
+LIFE_IN_PROCESSING_FEE_CHARGES = 100,000 × 0.005 = 500 OMR per month
 
 2. DISBURSED_LOAN_AMOUNT
 
@@ -20,13 +19,13 @@ Logic:
 	•	Total amount disbursed after deducting fees.
 
 Formula:
-￼
+DISBURSED_LOAN_AMOUNT = Loan Amount - (Processing Fees + Life Insurance Fees + Other Fees)
 
 Example:
 	•	Loan Amount: 100,000 OMR
 	•	Processing Fees: 500 OMR
 	•	Life Insurance: 2,000 OMR
-￼
+DISBURSED_LOAN_AMOUNT = 100,000 - (500 + 2,000) = 97,500 OMR
 
 3. MAX_LOAN_TENOR
 
@@ -34,12 +33,12 @@ Logic:
 	•	Maximum allowable loan tenor based on customer age.
 
 Formula:
-￼
+MAX_LOAN_TENOR = (MAX_AGE - Customer Age) × 12
 
 Example:
 	•	Customer Age: 45 years
 	•	Maximum Age Allowed: 60 years
-￼
+MAX_LOAN_TENOR = (60 - 45) × 12 = 180 months (15 years)
 
 4. MAX LOAN AMOUNT
 
@@ -47,13 +46,13 @@ Logic:
 	•	Maximum loan amount based on salary and DBR.
 
 Formula:
-￼
+MAX_LOAN_AMOUNT = (NET_SALARY × Salary Percentage) - Existing Loan EMI
 
 Example:
 	•	Net Salary: 1,500 OMR
 	•	Salary Percentage: 50%
 	•	Existing Loan EMI: 300 OMR
-￼
+MAX_LOAN_AMOUNT = (1,500 × 0.5) - 300 = 450 OMR
 
 5. EMI
 
@@ -61,17 +60,17 @@ Logic:
 	•	EMI (Equated Monthly Installment) is calculated using the standard EMI formula.
 
 Formula:
-￼
+EMI = (P × r × (1 + r)^n) / ((1 + r)^n - 1)
 Where:
-	•	￼ Loan Amount
-	•	￼ Monthly Interest Rate (￼)
-	•	￼ Loan Tenor (in months)
+P = Loan Amount
+r = Monthly Interest Rate
+n = Loan Tenor in months
 
 Example:
 	•	Loan Amount: 100,000 OMR
 	•	Interest Rate: 6% annual (0.5% monthly)
 	•	Loan Tenor: 120 months
-￼
+EMI = (100,000 × 0.005 × (1 + 0.005)^120) / ((1 + 0.005)^120 - 1) = 1,110.21 OMR
 
 6. DBR%
 
@@ -79,13 +78,13 @@ Logic:
 	•	Represents total EMI as a percentage of salary.
 
 Formula:
-￼
+DBR% = (Total EMI (Existing + New) / Net Salary) × 100
 
 Example:
 	•	Net Salary: 1,500 OMR
 	•	Existing EMI: 300 OMR
 	•	New EMI: 800 OMR
-￼
+DBR% = ((300 + 800) / 1,500) × 100 = 73.33%
 
 7. Total_Property_Value%
 
@@ -93,12 +92,12 @@ Logic:
 	•	Total property value for house loans.
 
 Formula:
-￼
+Total_Property_Value% = LAND_VALUE + BUILDING_VALUE
 
 Example:
 	•	Land Value: 50,000 OMR
 	•	Building Value: 100,000 OMR
-￼
+Total_Property_Value% = 50,000 + 100,000 = 150,000 OMR
 
 8. Loan_Amount_Per_Property_Value%
 
@@ -106,12 +105,12 @@ Logic:
 	•	Loan-to-value ratio for property loans.
 
 Formula:
-￼
+Loan_Amount_Per_Property_Value% = (Loan Amount / Total Property Value) × 100
 
 Example:
 	•	Loan Amount: 100,000 OMR
 	•	Total Property Value: 150,000 OMR
-￼
+Loan_Amount_Per_Property_Value% = (100,000 / 150,000) × 100 = 66.67%
 
 9. Age Error
 
@@ -122,7 +121,7 @@ Example:
 	•	Current Age: 55 years
 	•	Loan Tenor: 120 months
 	•	Max Age: 60 years
-￼
+Age Error = "Age at maturity exceeds maximum allowable age of 60 years."
 
 10. LTV_Error
 
@@ -130,13 +129,13 @@ Logic:
 	•	Checks if loan-to-value exceeds the maximum percentage.
 
 Formula:
-￼
+LTV% = (Loan Amount / Total Property Value) × 100
 
 Example:
 	•	Loan Amount: 100,000 OMR
 	•	Total Property Value: 150,000 OMR
 	•	Maximum LTV: 60%
-￼
+LTV_Error = "LTV exceeds the allowable percentage of 60%."
 
 11. Age At Maturity
 
@@ -144,12 +143,12 @@ Logic:
 	•	Customer’s age at the end of the loan tenor.
 
 Formula:
-￼
+Age At Maturity = Current Age + (Loan Tenor (months) / 12)
 
 Example:
 	•	Current Age: 30 years
 	•	Loan Tenor: 180 months
-￼
+Age At Maturity = 30 + (180 / 12) = 45 years
 
 12. Loan Processing FEE With VAT
 
@@ -157,12 +156,12 @@ Logic:
 	•	Processing fee including VAT.
 
 Formula:
-￼
+Loan Processing FEE With VAT = Processing Fee + (Processing Fee × VAT Rate)
 
 Example:
 	•	Processing Fee: 1,000 OMR
 	•	VAT Rate: 5%
-￼
+Loan Processing FEE With VAT = 1,000 + (1,000 × 0.05) = 1,050 OMR
 
 13. EMI START DATE and EMI END DATE
 
@@ -172,7 +171,7 @@ Logic:
 Example:
 	•	Loan Start Date: 1st Jan 2024
 	•	Loan Tenor: 120 months
-￼
-￼
+EMI Start Date = 1st Feb 2024
+EMI End Date = 1st Jan 2034
 
-These formulas should now be easy to copy and reference! Let me know if you need more clarifications.
+This format includes plain-text formulas and examples, making it easier to copy and understand. Let me know if further refinements are needed!
