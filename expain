@@ -1,0 +1,172 @@
+The stored procedure SP_Loan_Calculator implements complex logic to determine loan eligibility, calculate fees, and generate loan reports. Below is a detailed explanation of all the logic:
+
+1. Loan Tenor and Age Checks
+
+Logic:
+
+	•	The customer’s age in months (AGE_IN_MONTHS) is calculated using MONTHS_BETWEEN() based on the DATE_OF_BIRTH.
+	•	Loan maturity age validation:
+	•	Ensures that the customer’s age at loan maturity does not exceed the maximum allowable age (MAX_AGE) defined in EMI_CONDITIONS.
+	•	Maximum loan tenor (MAX_LOAN_TENOR):
+	•	Depends on the loan product and salary assignment status.
+	•	Adjusts tenor for exceptions (e.g., waiver months or ISEXCEPTION_CASE).
+
+Purpose:
+
+	•	Prevents loans from extending beyond the customer’s financial eligibility or age limit.
+
+2. Interest Serving Period Logic
+
+Logic:
+
+	•	If INTEREST_SERVING_PERIOD is provided, it adjusts:
+	•	The loan tenor by deducting the interest-only period.
+	•	The age at maturity by adding the interest-only period.
+
+Purpose:
+
+	•	Accounts for scenarios where the customer pays only interest for a specified period before starting EMI payments.
+
+3. Maximum Loan Amount Calculation
+
+Logic:
+
+	•	For Auto Loans:
+	•	Maximum loan amount is a percentage of the vehicle value (VEHICLE_VALUE) defined in EMI_CONDITIONS.
+	•	For Property Loans (House Loan):
+	•	Based on Loan-to-Value (LTV):
+	•	LTV_Local is fetched based on whether it’s a first buy (IS_FIRST_BUY).
+	•	The total loan amount is capped at a percentage of the property value (LAND_VALUE + BUILDING_VALUE).
+	•	For Personal Loans:
+	•	The maximum loan amount is calculated as a percentage of the net salary (NET_SALARY) after considering existing EMIs (EXISTINGLOAN_INSTALLMENT).
+
+Purpose:
+
+	•	Ensures the loan amount does not exceed the customer’s financial capacity or property value.
+
+4. Processing Fee Calculation
+
+Logic:
+
+	•	Fetches the processing fee for the loan product from the processing_fee_types table.
+	•	Includes VAT and any additional charges.
+	•	Special rules are applied for exception cases and specific products (e.g., House Loans, Auto Loans).
+
+Purpose:
+
+	•	Determines the upfront cost to the customer for processing the loan.
+
+5. Life Insurance Fee Calculation
+
+Logic:
+
+	•	Based on LI_TYPE:
+	•	Monthly: Life insurance is calculated as a percentage of the loan amount, including associated fees.
+	•	Upfront: Insurance is calculated for the full tenor and added to the disbursed loan amount.
+	•	Outside Cover: No insurance fees are applied.
+	•	Special rules for House Loans:
+	•	Includes additional fees like mortgage and property insurance.
+
+Purpose:
+
+	•	Accounts for mandatory insurance costs associated with the loan.
+
+6. Fee Breakdown (House Loans)
+
+Logic:
+
+	•	Calculates additional fees specific to property loans:
+	•	Mortgage Fee: A percentage of the loan amount.
+	•	Valuation Fee: A fixed value or capped fee for property valuation.
+	•	Property Insurance Fee: A percentage of the property reinstatement value, with minimum limits.
+
+Purpose:
+
+	•	Includes property-related fees to give a complete cost picture.
+
+7. Loan Disbursement Amount Calculation
+
+Logic:
+
+	•	Total disbursed loan amount:
+	•	Sum of:
+	•	Loan principal (LOAN_REQUESTED).
+	•	Processing fees.
+	•	Life insurance fees.
+	•	Property-related fees (if applicable).
+	•	Adjusted for waiver scenarios.
+	•	Validation ensures the disbursed amount does not exceed the customer’s eligibility or property value.
+
+Purpose:
+
+	•	Provides the actual loan amount the customer will receive after deducting all applicable fees.
+
+8. EMI Calculation
+
+Logic:
+
+	•	EMI is calculated using the standard formula:
+￼
+Where:
+	•	￼ = Disbursed Loan Amount
+	•	￼ = Monthly Interest Rate (￼)
+	•	￼ = Loan Tenor (in months).
+	•	Amortization schedule is generated using SP_BUILD_LOAN_AMORTIZATION.
+
+Purpose:
+
+	•	Determines the monthly repayment amount for the customer.
+
+9. Validation Errors
+
+Logic:
+
+	•	Age Error:
+	•	Validates that the customer’s age does not exceed MAX_AGE.
+	•	DBR (Debt-to-Burden Ratio) Error:
+	•	Ensures the total EMI (existing + new) does not exceed the permissible DBR percentage.
+	•	LTV (Loan-to-Value) Error:
+	•	Ensures the loan does not exceed the permissible property value percentage.
+
+Purpose:
+
+	•	Identifies and flags eligibility violations to prevent financial risks.
+
+10. Waivers and Exceptions
+
+Logic:
+
+	•	Fee Waivers (IsWaiver):
+	•	Reduces processing and other fees for eligible cases.
+	•	Exception Cases (ISEXCEPTION_CASE):
+	•	Overrides standard rules for loan tenor and age validation.
+
+Purpose:
+
+	•	Accommodates special customer scenarios.
+
+11. Result Compilation
+
+Logic:
+
+	•	Stores all calculated values and errors in a temporary table (EMI_TEMP):
+	•	Key metrics: DISBURSED_LOAN_AMOUNT, EMI, DBR%, etc.
+	•	Errors: Age Error, DBR_Error, LTV_Error.
+	•	Returns results via the output cursor RESULT.
+
+Purpose:
+
+	•	Provides a consolidated view of loan calculations and validation results.
+
+Key Scenarios Handled
+
+	1.	Standard Loan Eligibility:
+	•	Ensures the customer meets age, salary, and tenor criteria.
+	2.	Existing Loans:
+	•	Deducts existing EMI from eligibility calculations.
+	3.	Property Loans:
+	•	Adds property-specific fees and validations.
+	4.	Exceptional Cases:
+	•	Overrides standard rules for special cases.
+
+Let me know if you need further clarification on any specific logic!
