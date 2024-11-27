@@ -1,0 +1,92 @@
+The EMI_CONDITIONS table is a key component of this procedure. It stores the various conditions and configurations that are used to calculate eligibility, fees, and limits for different loan products. The table is queried multiple times within the procedure to fetch these conditions.
+
+Role of the EMI_CONDITIONS Table
+
+The table provides values for:
+	1.	Maximum and minimum age for loan eligibility.
+	2.	Maximum loan tenor allowed for different products.
+	3.	Loan-to-value (LTV) percentages.
+	4.	Debt-to-Burden Ratio (DBR) limits.
+	5.	Salary percentage factors for loan eligibility.
+	6.	Other conditional parameters specific to products and customer types (e.g., pensioners).
+
+Sample Structure of EMI_CONDITIONS Table
+
+Column Name	Data Type	Description
+CONDITION_TYPE	VARCHAR2	Describes the condition (e.g., Max_age, LoanToValue_NEW%).
+CONDITION_VALUE	VARCHAR2	Value associated with the condition (e.g., 60 for Max_age).
+LOAN_TYPE	VARCHAR2	Loan product type (e.g., Auto Loan, House Loan).
+END_DATE	DATE	End date of the condition’s validity (ensures active conditions are used).
+PENSIONER_FLAG	VARCHAR2	Indicates if the condition is for pensioners (YES/NO).
+LR	VARCHAR2	Indicates if the condition applies to loan requests (Y for Yes).
+
+Key Queries Using EMI_CONDITIONS
+
+1. Fetching Maximum Age
+
+SELECT CONDITION_VALUE INTO MAX_AGE
+FROM EMI_CONDITIONS
+WHERE CONDITION_TYPE = 'Max_age'
+  AND LOAN_TYPE = PRODUCT
+  AND END_DATE IS NULL
+  AND PENSIONER_FLAG = pensioner_value
+  AND LR = 'Y';
+
+	•	This retrieves the maximum allowable age for the loan type (PRODUCT) and customer type (PENSIONER_FLAG).
+
+2. Fetching Maximum Loan Tenor
+
+SELECT CONDITION_VALUE INTO MAX_LOAN_TENOR
+FROM EMI_CONDITIONS
+WHERE CONDITION_TYPE = temp_Value
+  AND LOAN_TYPE = PRODUCT
+  AND END_DATE IS NULL
+  AND PENSIONER_FLAG = pensioner_value
+  AND LR = 'Y';
+
+	•	Retrieves the maximum loan tenor. The temp_Value dynamically determines the condition based on the salary assignment (SALARY_ASSIGNMENT).
+
+3. Fetching Loan-to-Value (LTV) Percentages
+
+SELECT CONDITION_VALUE INTO LTV_Local
+FROM EMI_CONDITIONS
+WHERE CONDITION_TYPE = 'LoanToValue_NEW%'
+  AND LOAN_TYPE = PRODUCT
+  AND END_DATE IS NULL
+  AND PENSIONER_FLAG = pensioner_value
+  AND LR = 'Y';
+
+	•	For new purchases, fetches the percentage of the property value that can be financed by the loan.
+
+4. Fetching Salary Percentage
+
+SELECT CONDITION_VALUE INTO Sal_Percentage
+FROM EMI_CONDITIONS
+WHERE CONDITION_TYPE = 'sal_percentage'
+  AND LOAN_TYPE = PRODUCT
+  AND END_DATE IS NULL
+  AND PENSIONER_FLAG = pensioner_value
+  AND LR = 'Y';
+
+	•	Retrieves the percentage of the customer’s salary that determines the maximum loan amount.
+
+5. Fetching Medical Examination Criteria
+
+SELECT CONDITION_VALUE INTO medicalExaminationLoanAmount
+FROM EMI_CONDITIONS
+WHERE LOAN_TYPE = PRODUCT
+  AND CONDITION_TYPE = 'MedicalExamination_Loan_Limit'
+  AND END_DATE IS NULL
+  AND PENSIONER_FLAG = pensioner_value
+  AND LR = 'Y';
+
+	•	Retrieves the loan amount limit above which a medical examination is required.
+
+Purpose and Flexibility
+
+The EMI_CONDITIONS table centralizes the loan rules, making the procedure:
+	1.	Dynamic: Easily update rules without modifying the procedure code.
+	2.	Product-Specific: Allows differentiation of rules by loan product.
+	3.	Customer-Specific: Handles unique conditions for pensioners or other customer categories.
+
+Let me know if you need further clarification or an example dataset for EMI_CONDITIONS!
