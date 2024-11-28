@@ -1,0 +1,46 @@
+else if(tw.local.typeOfLoan == "Top-up Merge" || tw.local.typeOfLoan == "Pensioners Top-up Merge"){
+	tw.local.typeOfLoan = "002";
+	
+	
+	tw.local.emiStDt = tw.local.isStaff ? 16 : 26
+	
+	
+	
+	API CALL -->
+	
+	Loan account creation(Type of loan : 002) : LoanAcctAdd
+	Checking Balance Before Disbusrement : effectiveBalanceBeforeDisbusrement : AcctInq
+	Loan Disbusrement : loanDisbursement :  (if(tw.local.lifeInsuranceType == "Monthly"){
+												tw.local.lifeInsuranceCodes.name = "MISC4";
+												tw.local.lifeInsuranceCodes.value = "PLMONTHLYINS1";
+												
+												tw.local.lifeInsuranceAdminCodes.name = "MISC3";
+												tw.local.lifeInsuranceAdminCodes.value = "PLINSADM";
+												
+											}else if(tw.local.lifeInsuranceType == "Upfront"){
+												tw.local.lifeInsuranceCodes.name = "GINSR";
+												tw.local.lifeInsuranceCodes.value = "REGINSR";
+												
+												tw.local.lifeInsuranceAdminCodes.name = "MISC3";
+												tw.local.lifeInsuranceAdminCodes.value = "PLINSADM";
+											})
+											
+	if(tw.local.main.loanType=="Top-up Merge" || tw.local.main.loanType == "Pensioners Merge")
+	
+	(Selected Loans Account Number ) : loan pay off API: LoanPayoff(<LOAN_ACCT><#= tw.local.loanAcctNumber #></LOAN_ACCT>
+				<COLL_ACCT><#= tw.local.operativeAccountNumber #></COLL_ACCT>
+				<COLLECT_FEES><#= tw.local.collectFees #></COLLECT_FEES>) : tw.local.disbursementDetails.payOffCharge
+				
+				
+	loan Closer: LoanClosure(<LOAN_ACCT><#= tw.local.loanAcctNumber #></LOAN_ACCT>
+				<CLOSURE_RMKS>Closing account</CLOSURE_RMKS>)
+				
+				
+	if(RTGS selected RTGS call)
+	if(pay order Selected Payorder call)
+	
+	
+	Balance Check 
+	
+	findAmortSchedule
+	FMS
