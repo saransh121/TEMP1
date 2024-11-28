@@ -1,0 +1,123 @@
+Here’s the logic for Age At Maturity Error in plain text format for easy copying:
+
+Logic for Age At Maturity Error
+
+The Age At Maturity Error occurs when the borrower’s age at the end of the loan tenor exceeds the maximum allowable age (MAX_AGE). This ensures the customer can repay the loan within an acceptable timeframe.
+
+1. Age at Maturity Calculation
+
+The customer’s age at loan maturity is calculated as:
+
+Age At Maturity = Current Age + (Loan Tenor (in months) / 12)
+
+Where:
+	•	Current Age = AGE_IN_MONTHS / 12
+	•	Loan Tenor is the requested duration of the loan.
+
+2. Condition Check
+
+If:
+
+Age At Maturity > MAX_AGE
+
+Then an error is triggered:
+
+Age At Maturity Error = "Your requested loan tenor exceeds max allowable age. Max age is: " + MAX_AGE + " years."
+
+3. Adjustments with Waiver Period
+
+If a waiver period is included in the loan (e.g., delayed repayments), the loan tenor is adjusted:
+
+Adjusted Loan Tenor = Loan Tenor + Waiver Months
+
+This increases the risk of exceeding MAX_AGE.
+
+Practical Examples
+
+Example 1: No Waiver
+
+	•	Customer Age: 40 years
+	•	Loan Tenor: 240 months (20 years)
+	•	Maximum Age (MAX_AGE): 60 years
+
+Calculation:
+
+Age At Maturity = 40 + (240 / 12) = 40 + 20 = 60 years
+
+Condition:
+
+Age At Maturity <= MAX_AGE
+
+Result: No error; loan is approved.
+
+Example 2: Exceeds MAX_AGE
+
+	•	Customer Age: 50 years
+	•	Loan Tenor: 180 months (15 years)
+	•	Maximum Age (MAX_AGE): 60 years
+
+Calculation:
+
+Age At Maturity = 50 + (180 / 12) = 50 + 15 = 65 years
+
+Condition:
+
+Age At Maturity > MAX_AGE
+
+Result:
+
+Age At Maturity Error = "Your requested loan tenor exceeds max allowable age. Max age is: 60 years."
+
+Example 3: With Waiver Period
+
+	•	Customer Age: 45 years
+	•	Loan Tenor: 120 months (10 years)
+	•	Waiver Period: 12 months
+	•	Maximum Age (MAX_AGE): 55 years
+
+Calculation:
+
+Adjusted Loan Tenor = 120 + 12 = 132 months
+Age At Maturity = 45 + (132 / 12) = 45 + 11 = 56 years
+
+Condition:
+
+Age At Maturity > MAX_AGE
+
+Result:
+
+Age At Maturity Error = "Your requested loan tenor and waiver period exceed max allowable age. Max age is: 55 years."
+
+4. Loan Tenor Adjustment
+
+If the requested tenor exceeds the allowable limit, the system can suggest a revised tenor:
+
+Max Loan Tenor Allowed = (MAX_AGE - Current Age) × 12
+
+Example:
+	•	Customer Age: 50 years
+	•	Maximum Age (MAX_AGE): 60 years
+
+Max Loan Tenor Allowed = (60 - 50) × 12 = 120 months (10 years)
+
+Suggestion:
+
+"Please reduce the loan tenor to 120 months to meet max allowable age."
+
+Error Messages
+
+	1.	Without Waiver:
+
+"Your requested loan tenor exceeds max allowable age. Max age is: 60 years."
+
+
+	2.	With Waiver:
+
+"Your requested loan tenor and waiver period exceed max allowable age. Max age is: 55 years."
+
+
+	3.	Suggested Adjustment:
+
+"Please reduce the loan tenor to 120 months to meet max allowable age."
+
+This plain text format covers the logic for easy understanding and use. Let me know if further details are needed!
