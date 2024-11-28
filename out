@@ -1,7 +1,14 @@
-Output Field Name,Description,Calculation Logic,Possible Values
-DISBURSED_LOAN_AMOUNT,Final loan amount disbursed to the customer.,DISBURSED_LOAN_AMOUNT = LOAN_REQUESTED - (Processing Fees + Life Insurance + Property Fees + Valuation Fees + Mortgage Fees + Other Fees),Positive value if eligible; 0 if deductions exceed requested loan amount.
-EMI,Monthly installment amount.,\[ EMI = \(IR × LOAN\_AMOUNT × (1 + IR)^{Loan\_Tenor}\) / \((1 + IR)^{Loan\_Tenor} - 1\) \] where ￼,Positive value if eligible; 0 if DISBURSED_LOAN_AMOUNT is 0.
-LIFE_INSURANCE,Cost of life insurance applied to the loan.,For Monthly: LIFE_INSURANCE = (Loan Amount / 1000) × Insurance Factor × Monthly Multiplier. For Upfront: LIFE_INSURANCE = (Loan Amount / 1000) × Insurance Factor × Loan Tenor.,Positive value based on loan amount and type of insurance; 0 if LI_TYPE = Outside Cover or No Insurance.
-DBR%,Debt-to-Burden Ratio.,DBR% = (Total EMI / Net Salary) × 100,Positive value if EMI is calculated; Error if DBR exceeds limit defined in EMI_CONDITIONS.
-MAX_LOAN_TENOR,Maximum allowable loan tenor.,Fetched dynamically from the EMI_CONDITIONS table based on product type, pensioner flag, and loan rules.,Positive numeric value (e.g., “300 months”).
-AGE_AT_MATURITY_ERROR,Error related to age at maturity.,Triggered if Age At Maturity > MAX_AGE.,"Your requested loan tenor exceeds max allowable age. Max age is: [MAX_AGE] years."
+Field Name,Description
+DISBURSED_LOAN_AMOUNT,Final loan amount after deducting fees and charges.
+EMI,Monthly installment amount calculated for the loan.
+MAX_LOAN_TENOR,Maximum allowable loan tenor in months for the customer.
+LIFE_INSURANCE,Life insurance cost applicable to the loan.
+AGE_AT_MATURITY_ERROR,Error if customer’s age at maturity exceeds the maximum allowed age.
+REQUESTED_LOAN_TENOR_ERROR,Error if requested loan tenor exceeds the maximum or minimum permissible tenor.
+DBR%,Debt-to-Burden Ratio calculated as (Total EMI / Net Salary) × 100.
+DBR_ERROR,Error if the customer’s DBR exceeds the allowable limit.
+LTV_ERROR,Error if the Loan-to-Value (LTV) ratio exceeds the allowable limit.
+VALUATIONFEE_ERROR,Error if the valuation fee exceeds the maximum permissible value.
+MULKIYA_TRANSFER_ERROR,Error if the Mulkiya transfer fee exceeds the allowable amount.
+EMPLOYER_NOT_FOUND,Error if the employer is not listed in the approved employer database.
+ABOVE_100K_ERROR,Error if the loan amount or age requires a medical examination.
