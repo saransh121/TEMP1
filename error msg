@@ -1,0 +1,20 @@
+Error Variable,Possible Messages
+AGE_AT_MATURITY_ERROR,“Your requested loan tenor exceeds max allowable age. Max age is: [MAX_AGE] years.”
+,“Your requested loan tenor and waiver period exceed max allowable age. Max age is: [MAX_AGE] years.”
+,“Please reduce the loan tenor to [Adjusted Loan Tenor] months to meet max allowable age.”
+,“Age at maturity exceeds permissible limits after loan adjustment. Max age is: [MAX_AGE] years.”
+REQUESTED_LOAN_TENOR_ERROR,“Requested loan tenor is not eligible. Max loan tenor is: [MAX_LOAN_TENOR] months.”
+,“Your requested loan tenor and waiver period exceed max allowable age. Max age is: [MAX_AGE] years.”
+,“You are not eligible as your age does not exceed the minimum requirement. Minimum age is: [minAge].”
+DBR_ERROR,“DBR must be less than [Max DBR].”
+,“Your DBR exceeds the allowable limit for this loan product.”
+LTV_ERROR,“LTV exceeds the allowable percentage of [Max LTV%].”
+,“Loan-to-value ratio is not eligible for this loan type. Maximum LTV is: [Max LTV%].”
+VALUATIONFEE_ERROR,“Valuation Fee must be less than [Max Valuation Fee]. Replaced with max value.”
+MULKIYA_TRANSFER_ERROR,“Mulkiya transfer fee is more than the eligible fee. Replaced with max eligible amount.”
+AGE_ERROR,“Your age does not meet the minimum requirement. Minimum age is: [minAge / 12] years.”
+,“Your requested loan tenor exceeds max allowable age. Max age is: [MAX_AGE] years.”
+OTHER_FEES_ERROR,“Other fees provided are not eligible for this loan type.”
+EMPLOYER_NOT_FOUND,“Employer is not in the approved list. Please refer to the approval list.”
+ABOVE_100K_ERROR,“Medical Examination Required. Loan amount exceeds [Medical Examination Limit].”
+,“Medical Examination Required. Age is above [Medical Examination Age].”
