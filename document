@@ -1,0 +1,66 @@
+Here’s an enhanced documentation including the calculation logic for each key parameter and output, tailored for the middleware team:
+
+Documentation for Loan Calculator Stored Procedure
+
+Procedure Name
+
+SP_Loan_Calculator
+
+Purpose
+
+The procedure calculates loan eligibility, EMI, loan tenor, disbursement amount, and other related details for customers based on their profile and the loan product requested. It also validates input data against defined conditions and generates appropriate error messages when the conditions are not met.
+
+Input Parameters
+
+Parameter Name	Type	Mandatory	Description
+CUSTOMER_NAME	VARCHAR2	Yes	Full name of the customer applying for the loan.
+NATIONAL_ID	VARCHAR2	Yes	Unique identification number of the customer (e.g., ID or passport number).
+MOBILE_NUMBER	VARCHAR2	Yes	Customer’s mobile phone number for contact purposes.
+EMAIL_ID	VARCHAR2	Yes	Customer’s email address for correspondence.
+EMPLOYERNAME	VARCHAR2	Yes	Name of the employer for salaried customers.
+CHANNEL_TYPE	VARCHAR2	Yes	Loan application channel (e.g., online, branch, mobile app).
+DATE_OF_ENQUIRY	VARCHAR2	Yes	Date when the loan application or enquiry was initiated. Format: DD-MM-YYYY.
+NATIONALITY	VARCHAR2	Yes	Nationality of the customer.
+EMPLOYER_SEGMENT	VARCHAR2	No	Classification or segment of the employer (e.g., government, private sector).
+DATE_OF_BIRTH	VARCHAR2	Yes	Customer’s date of birth. Format: DD-MM-YYYY.
+NET_SALARY	VARCHAR2	Yes	Net monthly income of the customer in the bank’s currency.
+IS_EXISTING_LOAN	VARCHAR2	No	Indicates if the customer has an existing loan (YES/NO).
+EXISTING_LOAN_BANK	VARCHAR2	No	Bank name of the customer’s existing loan, if applicable.
+EXISTING_LOAN_AMOUNT	VARCHAR2	No	Outstanding amount of the existing loan.
+IS_EXISTING_LOAN_SETTLEMENT	VARCHAR2	No	Indicates if the existing loan will be settled (YES/NO).
+EXISTINGLOAN_INSTALLMENT	VARCHAR2	No	Monthly installment for the existing loan.
+PRODUCT	VARCHAR2	Yes	Loan product type (e.g., Personal Loan, Auto Loan, House Loan).
+LOANTYPE	VARCHAR2	No	Loan sub-type (e.g., Construction, Renovation).
+INTEREST_RATE	VARCHAR2	Yes	Interest rate applied to the loan as a percentage.
+LI_TYPE	VARCHAR2	No	Type of life insurance applied to the loan (Monthly, Upfront, Aman, etc.).
+LOAN_REQUESTED	VARCHAR2	Yes	Loan amount requested by the customer.
+LI_PROCESSING_FEE	VARCHAR2	No	Life insurance processing fee.
+IS_FIRST_BUY	VARCHAR2	No	Indicates if this is the customer’s first property purchase (YES/NO).
+LAND_VALUE	VARCHAR2	No	Value of the land for property-related loans.
+BUILDING_VALUE	VARCHAR2	No	Value of the building for property-related loans.
+ISMORTGAGE_FEE	VARCHAR2	No	Indicates if a mortgage fee applies (YES/NO).
+ISMULKIYA_TRANSFER_FEE	VARCHAR2	No	Indicates if a Mulkiya transfer fee applies (YES/NO).
+ISVALUATION_FEE	VARCHAR2	No	Indicates if a property valuation fee applies (YES/NO).
+ISPROPERTY_INSURANCE	VARCHAR2	No	Indicates if property insurance applies (YES/NO).
+VEHICLE_VALUE	VARCHAR2	No	Value of the vehicle for auto loans.
+SALARY_ASSIGNMENT	VARCHAR2	No	Indicates if salary assignment is required for the loan (YES/NO).
+REQUESTED_LOAN_TENOR	VARCHAR2	Yes	Requested loan duration in months.
+ISEXCEPTION_CASE	VARCHAR2	No	Indicates if the loan is an exception case (YES/NO).
+REINSTATE_VALUE	VARCHAR2	No	Reinstated value of the property.
+INTEREST_SERVING_PERIOD	VARCHAR2	No	Period during which only interest payments are made.
+PENSIONER	VARCHAR2	No	Indicates if the customer is a pensioner (YES/NO).
+ISPROCESSING_FEE	VARCHAR2	No	Indicates if processing fees apply (YES/NO).
+OTHER_FEE	VARCHAR2	No	Any additional fees applicable to the loan.
+IsWaiver	VARCHAR2	No	Indicates if any fee waivers apply (YES/NO).
+
+Output Parameters
+
+Parameter Name	Type	Description
+RESULT	SYS_REFCURSOR	A cursor containing all the calculated outputs, validation messages, and error messages.
+
+Key Outputs with Calculation Logic
+
+Field Name	Description	Calculation Logic
+DISBURSED_LOAN_AMOUNT	Final loan amount after deducting fees and charges.	DISBURSED_LOAN_AMOUNT = LOAN_REQUESTED - Total Deductions (Life Insurance, Processing Fees, Other Charges)
+EMI	Monthly installment amount calculated for the loan.	\[ EMI = \(IR × LOAN\_AMOUNT × (1 + IR)^{Loan\_Tenor}\) / \((1 + IR)^{Loan\_Tenor} - 1\) \] Where ￼.
+LIFE_INSURANCE	Life insurance cost applicable to the loan.	Based on the LI_TYPE: - Monthly: ￼ - Upfront: ￼.
