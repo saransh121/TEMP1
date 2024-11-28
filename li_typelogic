@@ -1,0 +1,85 @@
+Logic and Uses of LI_TYPE
+
+The parameter LI_TYPE determines how life insurance is calculated and applied in the loan process. Below are the details:
+
+Values of LI_TYPE
+
+	1.	Monthly: Life insurance is calculated and charged monthly.
+	2.	Upfront: Life insurance is charged for the entire loan tenor upfront.
+	3.	Outside Cover: No insurance fee is charged; customer provides external insurance.
+	4.	Customer Provided: Similar to “Outside Cover”; customer has their own insurance.
+	5.	Aman: Special type of insurance with custom calculations.
+	6.	Aman Plus: Enhanced version of “Aman” with higher premium rates.
+
+Logic
+
+	1.	If LI_TYPE = Monthly:
+	•	Formula:
+LIFE_INSURANCE = (Loan Amount / 1,000) × Monthly Rate × Loan Tenor
+	•	Example:
+Loan Amount = 100,000 OMR
+Monthly Rate = 0.5 OMR per 1,000 OMR
+Loan Tenor = 120 months
+Calculation:
+LIFE_INSURANCE = (100,000 / 1,000) × 0.5 × 120 = 6,000 OMR
+	2.	If LI_TYPE = Upfront:
+	•	Formula:
+LIFE_INSURANCE = (Loan Amount / 1,000) × Annual Rate × Loan Tenor in Years
+	•	Example:
+Loan Amount = 100,000 OMR
+Annual Rate = 2 OMR per 1,000 OMR
+Loan Tenor = 10 years
+Calculation:
+LIFE_INSURANCE = (100,000 / 1,000) × 2 × 10 = 2,000 OMR
+	3.	If LI_TYPE = Outside Cover or Customer Provided:
+	•	Formula:
+LIFE_INSURANCE = 0
+	4.	If LI_TYPE = Aman:
+	•	Formula:
+LIFE_INSURANCE = Loan Amount × 0.2% × Loan Tenor in Years
+	•	Example:
+Loan Amount = 100,000 OMR
+Loan Tenor = 10 years
+Calculation:
+LIFE_INSURANCE = 100,000 × 0.002 × 10 = 2,000 OMR
+	5.	If LI_TYPE = Aman Plus:
+	•	Formula:
+LIFE_INSURANCE = Loan Amount × 0.25% × Loan Tenor in Years
+	•	Example:
+Loan Amount = 100,000 OMR
+Loan Tenor = 10 years
+Calculation:
+LIFE_INSURANCE = 100,000 × 0.0025 × 10 = 2,500 OMR
+
+Uses of LI_TYPE
+
+	1.	Risk Coverage: Ensures the loan is insured against unforeseen borrower risks.
+	2.	Loan Disbursement Amount: Determines whether insurance fees are deducted upfront or charged monthly.
+	3.	Loan Eligibility: Life insurance may be mandatory for some loans.
+	4.	Customer Flexibility: Allows customers to use external insurance.
+	5.	Bank’s Profitability: Generates additional revenue through insurance fees.
+
+Practical Examples
+
+Case 1: Monthly Insurance
+
+	•	Loan Amount = 50,000 OMR
+	•	Monthly Rate = 0.5 OMR per 1,000 OMR
+	•	Loan Tenor = 60 months
+	•	Calculation:
+LIFE_INSURANCE = (50,000 / 1,000) × 0.5 × 60 = 1,500 OMR
+
+Case 2: Upfront Insurance
+
+	•	Loan Amount = 80,000 OMR
+	•	Annual Rate = 2 OMR per 1,000 OMR
+	•	Loan Tenor = 10 years
+	•	Calculation:
+LIFE_INSURANCE = (80,000 / 1,000) × 2 × 10 = 1,600 OMR
+
+Case 3: Outside Cover
+
+	•	Life insurance fee is not applied.
+	•	LIFE_INSURANCE = 0
+
+You can copy and use this text format as required. Let me know if you need further clarification!
