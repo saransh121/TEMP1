@@ -1,46 +1,82 @@
-else if(tw.local.typeOfLoan == "Top-up Merge" || tw.local.typeOfLoan == "Pensioners Top-up Merge"){
-	tw.local.typeOfLoan = "002";
-	
-	
-	tw.local.emiStDt = tw.local.isStaff ? 16 : 26
-	
-	
-	
-	API CALL -->
-	
-	Loan account creation(Type of loan : 002) : LoanAcctAdd
-	Checking Balance Before Disbusrement : effectiveBalanceBeforeDisbusrement : AcctInq
-	Loan Disbusrement : loanDisbursement :  (if(tw.local.lifeInsuranceType == "Monthly"){
-												tw.local.lifeInsuranceCodes.name = "MISC4";
-												tw.local.lifeInsuranceCodes.value = "PLMONTHLYINS1";
-												
-												tw.local.lifeInsuranceAdminCodes.name = "MISC3";
-												tw.local.lifeInsuranceAdminCodes.value = "PLINSADM";
-												
-											}else if(tw.local.lifeInsuranceType == "Upfront"){
-												tw.local.lifeInsuranceCodes.name = "GINSR";
-												tw.local.lifeInsuranceCodes.value = "REGINSR";
-												
-												tw.local.lifeInsuranceAdminCodes.name = "MISC3";
-												tw.local.lifeInsuranceAdminCodes.value = "PLINSADM";
-											})
-											
-	if(tw.local.main.loanType=="Top-up Merge" || tw.local.main.loanType == "Pensioners Merge")
-	
-	(Selected Loans Account Number ) : loan pay off API: LoanPayoff(<LOAN_ACCT><#= tw.local.loanAcctNumber #></LOAN_ACCT>
-				<COLL_ACCT><#= tw.local.operativeAccountNumber #></COLL_ACCT>
-				<COLLECT_FEES><#= tw.local.collectFees #></COLLECT_FEES>) : tw.local.disbursementDetails.payOffCharge
-				
-				
-	loan Closer: LoanClosure(<LOAN_ACCT><#= tw.local.loanAcctNumber #></LOAN_ACCT>
-				<CLOSURE_RMKS>Closing account</CLOSURE_RMKS>)
-				
-				
-	if(RTGS selected RTGS call)
-	if(pay order Selected Payorder call)
-	
-	
-	Balance Check 
-	
-	findAmortSchedule
-	FMS
+API Documentation for “Top-Up with Merge” Process
+
+This document outlines the steps involved in the “Top-Up with Merge” process, including the required API calls and their respective details. The primary goal is to manage loan top-up scenarios, including merging loan accounts, disbursing the loan amount, and closing existing loans.
+
+1. Loan Account Creation
+
+	•	Purpose: Create a new loan account with type 002 for “Top-Up Merge” or “Pensioners Top-Up Merge.”
+	•	API Name: LoanAcctAdd
+	•	Input Parameters:
+	•	typeOfLoan: Set as 002.
+	•	emiStDt: EMI start date (16 if staff, 26 otherwise).
+	•	Output: A newly created loan account.
+
+2. Balance Check Before Disbursement
+
+	•	Purpose: Verify the balance before proceeding with loan disbursement.
+	•	API Name: AcctInq
+	•	Input Parameters: Loan account number.
+	•	Output: Effective balance before disbursement.
+
+3. Loan Disbursement
+
+	•	Purpose: Disburse the loan amount.
+	•	API Name: loanDisbursement
+	•	Conditions:
+	•	If Life Insurance Type = “Monthly”:
+	•	lifeInsuranceCodes.name = "MISC4"
+	•	lifeInsuranceCodes.value = "PLMONTHLYINS1"
+	•	lifeInsuranceAdminCodes.name = "MISC3"
+	•	lifeInsuranceAdminCodes.value = "PLINSADM"
+	•	If Life Insurance Type = “Upfront”:
+	•	lifeInsuranceCodes.name = "GINSR"
+	•	lifeInsuranceCodes.value = "REGINSR"
+	•	lifeInsuranceAdminCodes.name = "MISC3"
+	•	lifeInsuranceAdminCodes.value = "PLINSADM"
+	•	Output: Disbursed loan amount and insurance details.
+
+4. Loan Payoff (if applicable)
+
+	•	Purpose: Pay off selected loans if the main loan type is “Top-Up Merge” or “Pensioners Merge.”
+	•	API Name: LoanPayoff
+	•	Input Parameters:
+	•	<LOAN_ACCT>: Selected loan account number.
+	•	<COLL_ACCT>: Operative account number.
+	•	<COLLECT_FEES>: Fee collection details.
+	•	Output: Loan payoff completed with details of charges.
+
+5. Loan Closure
+
+	•	Purpose: Close the paid-off loan account.
+	•	API Name: LoanClosure
+	•	Input Parameters:
+	•	<LOAN_ACCT>: Loan account number.
+	•	<CLOSURE_RMKS>: Remarks for closure (e.g., “Closing account”).
+	•	Output: Loan account closed.
+
+6. Disbursement Type Handling
+
+	•	RTGS: Trigger the RTGS API for RTGS disbursement.
+	•	Pay Order: Trigger the Pay Order API for pay order disbursement.
+
+7. Post-Disbursement Balance Check
+
+	•	Purpose: Ensure the balance is updated post-disbursement.
+	•	API Name: AcctInq
+	•	Output: Updated balance details.
+
+8. Amortization Schedule
+
+	•	Purpose: Generate the loan amortization schedule.
+	•	API Name: findAmortSchedule
+	•	Output: Amortization schedule details.
+
+9. Financial Management System (FMS) Update
+
+	•	Purpose: Update the Financial Management System (FMS) with loan details.
+	•	API Name: FMS
+	•	Output: Loan information updated in FMS.
+
+Summary
+
+The “Top-Up with Merge” process involves creating a new loan account, verifying balances, disbursing loans, and closing existing loans where applicable. It ensures seamless integration with insurance options, payoff mechanisms, and financial systems.
