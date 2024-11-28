@@ -1,0 +1,40 @@
+Field Name,Description,Mandatory,Possible Values
+CUSTOMER_NAME,Full name of the customer applying for the loan.,Yes,Any string (e.g., “John Doe”).
+NATIONAL_ID,Unique identification number of the customer (e.g., ID or passport number).,Yes,Alphanumeric (e.g., “123456789”).
+MOBILE_NUMBER,Customer’s mobile phone number for contact purposes.,Yes,Numeric string (e.g., “9876543210”).
+EMAIL_ID,Customer’s email address for correspondence.,Yes,Email format (e.g., “john.doe@example.com”).
+EMPLOYERNAME,Name of the employer for salaried customers.,Yes,Any string (e.g., “ABC Corp”).
+CHANNEL_TYPE,Loan application channel (e.g., online, branch, mobile app).,Yes,“Online”, “Branch”, “Mobile App”.
+DATE_OF_ENQUIRY,Date when the loan application or enquiry was initiated. Format: DD-MM-YYYY.,Yes,Any valid date format (e.g., “01-01-2024”).
+NATIONALITY,Nationality of the customer.,Yes,Any string (e.g., “Omani”).
+EMPLOYER_SEGMENT,Classification or segment of the employer (e.g., government, private sector).,No,“Government”, “Private”.
+DATE_OF_BIRTH,Customer’s date of birth. Format: DD-MM-YYYY.,Yes,Any valid date format (e.g., “01-01-1985”).
+NET_SALARY,Net monthly income of the customer in the bank’s currency.,Yes,Positive numeric value (e.g., “1000”).
+IS_EXISTING_LOAN,Indicates if the customer has an existing loan.,No,“YES”, “NO”.
+EXISTING_LOAN_BANK,Bank name of the customer’s existing loan, if applicable.,No,Any string (e.g., “XYZ Bank”).
+EXISTING_LOAN_AMOUNT,Outstanding amount of the existing loan.,No,Positive numeric value (e.g., “5000”).
+IS_EXISTING_LOAN_SETTLEMENT,Indicates if the existing loan will be settled.,No,“YES”, “NO”.
+EXISTINGLOAN_INSTALLMENT,Monthly installment for the existing loan.,No,Positive numeric value (e.g., “200”).
+PRODUCT,Loan product type (e.g., Personal Loan, Auto Loan, House Loan).,Yes,“Personal Loan”, “Auto Loan”, “House Loan”.
+LOANTYPE,Loan sub-type (e.g., Construction, Renovation).,No,“Construction”, “Renovation”.
+INTEREST_RATE,Interest rate applied to the loan as a percentage.,Yes,Positive numeric value (e.g., “5.5”).
+LI_TYPE,Type of life insurance applied to the loan.,No,“Monthly”, “Upfront”, “Aman”, “Outside Cover”.
+LOAN_REQUESTED,Loan amount requested by the customer.,Yes,Positive numeric value (e.g., “20000”).
+LI_PROCESSING_FEE,Life insurance processing fee.,No,Positive numeric value (e.g., “500”).
+IS_FIRST_BUY,Indicates if this is the customer’s first property purchase.,No,“YES”, “NO”.
+LAND_VALUE,Value of the land for property-related loans.,No,Positive numeric value (e.g., “50000”).
+BUILDING_VALUE,Value of the building for property-related loans.,No,Positive numeric value (e.g., “100000”).
+ISMORTGAGE_FEE,Indicates if a mortgage fee applies.,No,“YES”, “NO”.
+ISMULKIYA_TRANSFER_FEE,Indicates if a Mulkiya transfer fee applies.,No,“YES”, “NO”.
+ISVALUATION_FEE,Indicates if a property valuation fee applies.,No,“YES”, “NO”.
+ISPROPERTY_INSURANCE,Indicates if property insurance applies.,No,“YES”, “NO”.
+VEHICLE_VALUE,Value of the vehicle for auto loans.,No,Positive numeric value (e.g., “15000”).
+SALARY_ASSIGNMENT,Indicates if salary assignment is required for the loan.,No,“YES”, “NO”.
+REQUESTED_LOAN_TENOR,Requested loan duration in months.,Yes,Positive numeric value (e.g., “36”).
+ISEXCEPTION_CASE,Indicates if the loan is an exception case.,No,“YES”, “NO”.
+REINSTATE_VALUE,Reinstated value of the property.,No,Positive numeric value (e.g., “75000”).
+INTEREST_SERVING_PERIOD,Period during which only interest payments are made.,No,Positive numeric value (e.g., “6”).
+PENSIONER,Indicates if the customer is a pensioner.,No,“YES”, “NO”.
+ISPROCESSING_FEE,Indicates if processing fees apply.,No,“YES”, “NO”.
+OTHER_FEE,Any additional fees applicable to the loan.,No,Positive numeric value (e.g., “100”).
+IsWaiver,Indicates if any fee waivers apply.,No,“YES”, “NO”.
