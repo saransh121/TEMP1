@@ -1,0 +1,140 @@
+Here’s the explanation of PENSIONER in plain text format for easy copying:
+
+Logic for PENSIONER
+
+The PENSIONER parameter adjusts loan conditions for pensioners, providing specific rules for eligibility, fees, and other calculations.
+
+1. Maximum Age (MAX_AGE)
+
+	•	Pensioners have a higher maximum age limit for loan maturity compared to regular customers.
+	•	SQL Query:
+
+SELECT CONDITION_VALUE 
+INTO MAX_AGE 
+FROM EMI_CONDITIONS 
+WHERE CONDITION_TYPE = 'Max_age' 
+  AND LOAN_TYPE = PRODUCT 
+  AND PENSIONER_FLAG = 'YES' 
+  AND END_DATE IS NULL;
+
+	•	Example:
+	•	Regular customers: MAX_AGE = 60 years
+	•	Pensioners: MAX_AGE = 70 years
+
+2. Maximum Loan Tenor (MAX_LOAN_TENOR)
+
+	•	Pensioners may have shorter tenors to match their age and repayment ability.
+	•	SQL Query:
+
+SELECT CONDITION_VALUE 
+INTO MAX_LOAN_TENOR 
+FROM EMI_CONDITIONS 
+WHERE CONDITION_TYPE = 'Max_Loan_Tenor' 
+  AND LOAN_TYPE = PRODUCT 
+  AND PENSIONER_FLAG = 'YES' 
+  AND END_DATE IS NULL;
+
+	•	Example:
+	•	Regular customers: MAX_LOAN_TENOR = 240 months (20 years)
+	•	Pensioners: MAX_LOAN_TENOR = 120 months (10 years)
+
+3. Processing Fees
+
+	•	Pensioners may receive discounted or special processing fees.
+	•	SQL Query:
+
+SELECT PROCESSING_FEE 
+INTO loan_processing_fee 
+FROM processing_fee_types 
+WHERE LOAN_TYPE = PRODUCT 
+  AND PENSIONER_FLAG = 'YES' 
+  AND END_DATE IS NULL;
+
+	•	Example:
+	•	Regular customers: Processing Fee = 2% of Loan Amount
+	•	Pensioners: Processing Fee = 1% of Loan Amount
+
+4. Life Insurance Fees
+
+	•	Pensioners may have higher or lower life insurance premiums based on risk.
+	•	SQL Query:
+
+SELECT PROCESSING_FEE 
+INTO LIMultiplicationFactor 
+FROM processing_fee_types 
+WHERE LOAN_TYPE = PRODUCT 
+  AND processing_type = 'Life_Insurance_Multiplication_Factor' 
+  AND PENSIONER_FLAG = 'YES' 
+  AND END_DATE IS NULL;
+
+	•	Example:
+	•	Regular customers: LIFE_INSURANCE = Loan Amount × 0.2%
+	•	Pensioners: LIFE_INSURANCE = Loan Amount × 0.3%
+
+5. Eligibility Criteria
+
+	•	Pensioners may have:
+	•	Lower minimum net salary requirements.
+	•	Stricter DBR (Debt-to-Burden Ratio) limits.
+	•	SQL Query for DBR:
+
+SELECT CONDITION_VALUE 
+INTO DBR_Limit 
+FROM EMI_CONDITIONS 
+WHERE CONDITION_TYPE = 'Max_DBR%' 
+  AND LOAN_TYPE = PRODUCT 
+  AND PENSIONER_FLAG = 'YES' 
+  AND END_DATE IS NULL;
+
+	•	Example:
+	•	Regular customers: Max DBR = 50%
+	•	Pensioners: Max DBR = 40%
+
+6. Interest Rates
+
+	•	Pensioners may receive concessional or adjusted interest rates.
+	•	SQL Query:
+
+SELECT INTEREST_RATE 
+INTO IR 
+FROM EMI_CONDITIONS 
+WHERE CONDITION_TYPE = 'Interest_Rate' 
+  AND LOAN_TYPE = PRODUCT 
+  AND PENSIONER_FLAG = 'YES' 
+  AND END_DATE IS NULL;
+
+	•	Example:
+	•	Regular customers: Interest Rate = 6% per annum
+	•	Pensioners: Interest Rate = 5.5% per annum
+
+Scenarios Adjusted for Pensioners
+
+Scenario 1: Loan Maturity Age Check
+
+	•	Customer Age: 65 years
+	•	Loan Tenor: 120 months (10 years)
+	•	Pensioner MAX_AGE: 70 years
+	•	Result:
+	•	Regular Customer: Loan denied due to exceeding maturity age.
+	•	Pensioner: Loan approved.
+
+Scenario 2: DBR Validation
+
+	•	Net Salary: 500 OMR
+	•	Total EMI: 200 OMR
+	•	Max DBR for Pensioners: 40%
+	•	Calculation:
+DBR = (200 / 500) × 100 = 40%
+	•	Result:
+DBR meets the pensioner-specific limit.
+
+Scenario 3: Loan Amount Adjustment
+
+	•	Net Salary: 700 OMR
+	•	Salary Percentage for Pensioners: 30%
+	•	Calculation:
+MAX_LOAN_AMOUNT = 700 × 0.3 = 210 OMR
+	•	Result:
+Loan eligibility is capped at OMR 210.
+
+This format provides all logic and SQL snippets in plain text for quick reference and easy use. Let me know if you need further details!
