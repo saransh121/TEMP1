@@ -1,0 +1,128 @@
+Here’s a comprehensive list of data points to collect for credit scoring in the banking domain, categorized by their specific relevance. These features are commonly used in financial institutions to assess creditworthiness.
+
+1. Borrower Demographics
+
+	•	Full Name
+	•	Date of Birth (Age)
+	•	Gender
+	•	Marital Status
+	•	Dependents (Number of dependents)
+
+2. Employment Details
+
+	•	Employment Status: (Salaried, Self-Employed, Unemployed, Retired)
+	•	Occupation Type: (e.g., Government, Private, Freelancer)
+	•	Job Tenure: (Number of years at the current job)
+	•	Employer Name and Type: (Company size, sector)
+	•	Income Source: (e.g., Salary, Business Income, Freelance Work)
+
+3. Financial Details
+
+Income
+
+	•	Gross Monthly Income
+	•	Net Monthly Income (after taxes)
+	•	Other Sources of Income (e.g., rental income, dividends)
+
+Expenses
+
+	•	Monthly Rent or Mortgage Payment
+	•	Monthly Fixed Expenses (e.g., utilities, insurance premiums)
+	•	Discretionary Spending (e.g., dining, entertainment)
+
+Assets
+
+	•	Savings Account Balance
+	•	Investments: (e.g., mutual funds, stocks, bonds)
+	•	Real Estate Owned: (Value of properties owned)
+	•	Vehicles Owned: (Market value)
+
+Liabilities
+
+	•	Total Debt: (Sum of all loans and credit card balances)
+	•	Monthly Debt Payments: (e.g., EMIs, credit card bills)
+	•	Outstanding Loans: (e.g., home loan, car loan, personal loan)
+	•	Credit Card Utilization Rate: (Credit card balance/credit limit)
+
+4. Banking and Transaction Data
+
+	•	Account Type: (Savings, Checking, Fixed Deposit)
+	•	Account Tenure: (How long the account has been active)
+	•	Monthly Average Balance (MAB): (Account balance trends)
+	•	Transaction History: (Frequency and amount of transactions)
+	•	Overdraft Usage: (Frequency and amount of overdraft)
+	•	Loan Repayment History: (Payment dates and amounts)
+	•	Recent Returned Checks or Insufficient Funds Notices
+
+5. Credit History
+
+	•	Credit Score: (From credit bureaus like Experian, Equifax, TransUnion)
+	•	Number of Open Accounts: (Credit cards, loans, etc.)
+	•	Credit History Length: (How long accounts have been open)
+	•	Payment History: (Timeliness of payments on debts)
+	•	Defaults or Late Payments: (Details of missed payments)
+	•	Credit Inquiries: (Hard and soft inquiries over the past 12-24 months)
+	•	Debt-to-Income Ratio (DTI): (Total debt divided by total income)
+	•	Loan-to-Value Ratio (LTV): (Loan amount compared to collateral value)
+
+6. Loan Application Data
+
+	•	Loan Amount Requested
+	•	Loan Purpose: (e.g., personal, home, car, education)
+	•	Loan Term: (Duration of the loan in months/years)
+	•	Interest Rate: (Fixed or variable)
+	•	Type of Loan: (Secured or unsecured)
+	•	Collateral Details: (If applicable, e.g., property, vehicles)
+
+7. Behavioral Data
+
+	•	Spending Behavior:
+	•	Categories of frequent spending (e.g., grocery, travel, luxury items)
+	•	Savings Habits:
+	•	Frequency and amount of deposits into savings accounts
+	•	Withdrawal Patterns: (Frequency and size of withdrawals)
+	•	Subscription Services Payments: (Netflix, Spotify, etc., for discretionary spending insights)
+
+8. Personal Identification
+
+	•	National ID Number: (e.g., Aadhar in India, SSN in the US)
+	•	PAN Number (Tax Identification):
+	•	Passport Number
+	•	Driving License Number
+	•	Utility Bills for Address Verification
+
+9. Market-Specific Economic Indicators (Optional)
+
+	•	Regional Unemployment Rate
+	•	Local Cost of Living Index
+	•	Inflation Rate
+	•	Housing Market Trends: (For mortgage-related credit)
+
+10. Other Risk Indicators
+
+	•	Fraud Risk Score: (Flagged based on prior fraudulent activity, if any)
+	•	Bankruptcy History
+	•	Litigation History: (Any ongoing legal cases)
+	•	Insurance Coverage Details: (Health, life, property insurance)
+
+Bonus: Alternative Data Sources (Optional)
+
+	•	Mobile Payment Data: (E.g., UPI, PayPal transactions)
+	•	Social Media Activity: (Creditworthiness signals in some regions)
+	•	Utility Payments: (Electricity, water, etc.)
+	•	Rental Payment History
+
+How to Collect This Data:
+
+	1.	From Customers:
+	•	Use online loan application forms or banking portals.
+	•	Collect supporting documents (e.g., income proofs, ID proofs).
+	2.	From External Sources:
+	•	Partner with credit bureaus.
+	•	APIs for alternative data providers (e.g., Plaid, Yodlee).
+	3.	From Internal Systems:
+	•	Fetch transaction and account details from the bank’s core systems.
+
+Next Steps:
+
+	•	Would you like help structuring this data for training a credit scoring model or integrating APIs for automated data collection?
