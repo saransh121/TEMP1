@@ -1,0 +1,28 @@
+package com.example.icn;
+
+import com.ibm.ecm.extension.Plugin;
+import com.ibm.ecm.extension.PluginService;
+
+public class DynamicChoiceListPlugin extends Plugin {
+
+    @Override
+    public String getId() {
+        return "DynamicChoiceListPlugin"; // Unique plugin ID
+    }
+
+    @Override
+    public String getName() {
+        return "Dynamic Choice List Plugin"; // Display name
+    }
+
+    @Override
+    public String getVersion() {
+        return "1.0"; // Plugin version
+    }
+
+    @Override
+    public PluginService[] getServices() {
+        // Register the service that provides dropdown values
+        return new PluginService[]{new DynamicChoiceListService()};
+    }
+}
