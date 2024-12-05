@@ -1,0 +1,34 @@
+package com.example.icn;
+
+import com.ibm.ecm.extension.PluginService;
+import com.ibm.ecm.extension.PluginServiceCallbacks;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
+
+public class DynamicChoiceListService extends PluginService {
+
+    @Override
+    public String getId() {
+        return "DynamicChoiceListService"; // Unique service ID
+    }
+
+    @Override
+    public void execute(PluginServiceCallbacks callbacks, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        // Set response content type
+        response.setContentType("application/json");
+        PrintWriter out = response.getWriter();
+
+        // Dummy static dropdown values
+        String jsonResponse = "["
+                + "{ \"id\": \"1\", \"value\": \"Option 1\" },"
+                + "{ \"id\": \"2\", \"value\": \"Option 2\" },"
+                + "{ \"id\": \"3\", \"value\": \"Option 3\" }"
+                + "]";
+
+        // Write JSON response
+        out.write(jsonResponse);
+        out.flush();
+    }
+}
