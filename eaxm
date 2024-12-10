@@ -1,0 +1,20 @@
+BEGIN
+    SP_INSERT_DIGITAL_LOAN_QUEUE(
+        '123', 
+        'Main Branch', 
+        'APP12345', 
+        'SearchParam', 
+        'Pending', 
+        'CIF001', 
+        'CID001', 
+        'Personal Loan', 
+        '180', 
+        '70', 
+        'Software Engineer', 
+        'IT', 
+        '5000', 
+        '10000', 
+        '12', 
+        'LN12345'
+    );
+END;
