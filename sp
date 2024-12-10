@@ -1,0 +1,61 @@
+CREATE OR REPLACE PROCEDURE SP_INSERT_DIGITAL_LOAN_QUEUE (
+    P_CRE_BRANCH_CODE         VARCHAR2,
+    P_CRE_BRANCH_NAME         VARCHAR2,
+    P_APPLICATION_NUMBER      VARCHAR2,
+    P_SEARCHPARAMETERFORLAUNCHING VARCHAR2,
+    P_STATUS                  VARCHAR2,
+    P_CIF_ID                  VARCHAR2,
+    P_CIVIL_ID                VARCHAR2,
+    P_PURPOSE_OF_LOAN         VARCHAR2,
+    P_HEIGHT                  VARCHAR2,
+    P_WEIGHT                  VARCHAR2,
+    P_JOB_TITLE               VARCHAR2,
+    P_OCCUPATION              VARCHAR2,
+    P_GROSSINCOME             VARCHAR2,
+    P_LOAN_AMOUNT_REQUESTED   VARCHAR2,
+    P_TENURE                  VARCHAR2,
+    P_LOAN_ACCOUNT_NUMBERS    VARCHAR2
+) AS
+BEGIN
+    INSERT INTO sibawdb.TBL_DIGITAL_LOAN_QUEUE (
+        CRE_BRANCH_CODE,
+        CRE_BRANCH_NAME,
+        APPLICATION_NUMBER,
+        SEARCHPARAMETERFORLAUNCHING,
+        STATUS,
+        CIF_ID,
+        CIVIL_ID,
+        PURPOSE_OF_LOAN,
+        HEIGHT,
+        WEIGHT,
+        JOB_TITLE,
+        OCCUPATION,
+        GROSSINCOME,
+        LOAN_AMOUNT_REQUESTED,
+        TENURE,
+        LOAN_ACCOUNT_NUMBERS
+    ) VALUES (
+        P_CRE_BRANCH_CODE,
+        P_CRE_BRANCH_NAME,
+        P_APPLICATION_NUMBER,
+        P_SEARCHPARAMETERFORLAUNCHING,
+        P_STATUS,
+        P_CIF_ID,
+        P_CIVIL_ID,
+        P_PURPOSE_OF_LOAN,
+        P_HEIGHT,
+        P_WEIGHT,
+        P_JOB_TITLE,
+        P_OCCUPATION,
+        P_GROSSINCOME,
+        P_LOAN_AMOUNT_REQUESTED,
+        P_TENURE,
+        P_LOAN_ACCOUNT_NUMBERS
+    );
+    
+    COMMIT; -- Commit the transaction to save changes
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK; -- Rollback in case of an error
+        RAISE; -- Re-raise the exception
+END SP_INSERT_DIGITAL_LOAN_QUEUE;
