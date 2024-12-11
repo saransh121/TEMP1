@@ -1,0 +1,62 @@
+import java.sql.*;
+import java.io.FileReader;
+import java.util.List;
+import com.google.gson.*;
+
+public class StoredProcAutomation {
+    public static void main(String[] args) {
+        // Database connection details
+        String jdbcURL = "jdbc:mysql://<YourDatabaseURL>:3306/<DatabaseName>";
+        String username = "YourUsername";
+        String password = "YourPassword";
+
+        Connection connection = null;
+
+        try {
+            // Load JSON data from file
+            Gson gson = new Gson();
+            JsonArray requests = gson.fromJson(new FileReader("requests.json"), JsonArray.class);
+
+            // Establish database connection
+            connection = DriverManager.getConnection(jdbcURL, username, password);
+
+            // Loop through each request and call the stored procedure
+            for (JsonElement request : requests) {
+                JsonArray parameters = request.getAsJsonArray();
+
+                // Prepare the stored procedure call
+                String sql = "{CALL YourStoredProcedure(?, ?, ?, ?, ?, ?)}"; // Adjust based on your procedure
+                CallableStatement callableStatement = connection.prepareCall(sql);
+
+                // Set the parameters dynamically
+                for (int i = 0; i < parameters.size(); i++) {
+                    String value = parameters.get(i).getAsJsonObject().get("value").getAsString();
+                    callableStatement.setString(i + 1, value);
+                }
+
+                // Execute the stored procedure
+                boolean hasResultSet = callableStatement.execute();
+
+                // Handle results
+                if (hasResultSet) {
+                    ResultSet resultSet = callableStatement.getResultSet();
+                    while (resultSet.next()) {
+                        // Fetch and print results (store them in a file or process as needed)
+                        System.out.println("Result: " + resultSet.getString(1)); // Adjust column index as needed
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            // Close connection
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+}
