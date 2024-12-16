@@ -1,4 +1,15 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
+def answer_question(question, customer_id):
+    if "recent transaction history" in question:
+        query = f"SELECT * FROM transactions WHERE customer_id = {customer_id} ORDER BY date DESC LIMIT 5;"
+    elif "total account balance" in question:
+        query = f"SELECT balance FROM accounts WHERE customer_id = {customer_id};"
+    elif "pending complaints" in question:
+        query = f"SELECT * FROM complaints WHERE customer_id = {customer_id} AND status = 'pending';"
+    else:
+        return "I don't understand the question."
+    
+    result = get_customer_data(query)
+    return result
 
 model_name = "tiiuae/falcon-7b-instruct"  # Example model
 tokenizer = AutoTokenizer.from_pretrained(model_name)
