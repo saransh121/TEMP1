@@ -1,0 +1,1401 @@
+create or replace PROCEDURE SP_Loan_Calculator_MB 
+(
+  CUSTOMER_NAME IN VARCHAR2
+, NATIONAL_ID IN VARCHAR2
+, MOBILE_NUMBER IN VARCHAR2
+, EMAIL_ID IN VARCHAR2
+, EMPLOYERNAME IN VARCHAR2 
+, CHANNEL_TYPE IN VARCHAR2
+, DATE_OF_ENQUIRY IN VARCHAR2 
+, NATIONALITY IN VARCHAR2 
+, EMPLOYER_SEGMENT IN VARCHAR2 
+, DATE_OF_BIRTH_MON IN DATE 
+, NET_SALARY IN VARCHAR2 
+, IS_EXISTING_LOAN IN VARCHAR2 
+, EXISTING_LOAN_BANK IN VARCHAR2 
+, EXISTING_LOAN_AMOUNT IN VARCHAR2 
+, IS_EXISTING_LOAN_SETTLEMENT IN VARCHAR2 
+, EXISTINGLOAN_INSTALLMENT IN VARCHAR2 
+, PRODUCT IN VARCHAR2 
+, LOANTYPE IN VARCHAR2 
+, INTEREST_RATE IN VARCHAR2 
+, LI_TYPE IN VARCHAR2
+, LOAN_REQUESTED IN VARCHAR2 
+, LI_PROCESSING_FEE IN VARCHAR2  
+, IS_FIRST_BUY IN VARCHAR2
+,LAND_VALUE IN VARCHAR2
+,BUILDING_VALUE IN VARCHAR2
+,ISMORTGAGE_FEE IN VARCHAR2
+,ISMULKIYA_TRANSFER_FEE    IN VARCHAR2
+,ISVALUATION_FEE    IN VARCHAR2
+,ISPROPERTY_INSURANCE    IN VARCHAR2
+,VEHICLE_VALUE IN VARCHAR2
+,SALARY_ASSIGNMENT IN VARCHAR2
+,REQUESTED_LOAN_TENOR IN VARCHAR2
+,ISEXCEPTION_CASE IN VARCHAR2
+,REINSTATE_VALUE IN VARCHAR2
+,INTEREST_SERVING_PERIOD IN VARCHAR2
+,PENSIONER IN VARCHAR2
+,ISPROCESSING_FEE IN VARCHAR2
+,OTHER_FEE IN VARCHAR2
+,IsWaiver IN VARCHAR2
+,RESULT OUT SYS_REFCURSOR
+
+)
+AS
+--sqlStatment VARCHAR2(30000);
+DATA_FLAG  VARCHAR2(100) ;
+DATA_VALUE  VARCHAR2(1000);
+LIFE_INSURANCE NUMBER; 
+DBR number;
+EMI number;
+MAX_LOAN_TENOR number;
+DISBURSED_LOAN_AMOUNT NUMBER;
+MAX_AGE NUMBER;
+AGE_IN_MONTHS NUMBER;
+PROCESSING_FEE NUMBER;
+MAX_LOAN_AMOUNT NUMBER;
+IR NUMBER;
+valuess NUMBER;
+--TEMP_TABLE VARCHAR2(1000);
+--TEMP_TABLE_STATMENT VARCHAR2(1000);
+LIFE_IN_PROCESSING_FEE_CHARGES NUMBER;
+Total_Property_Value NUMBER;
+Loan_Amount_Per_Property_Value NUMBER;
+Loan_Tenor NUMBER;
+Sal_Percentage NUMBER;
+DBR_Validation VARCHAR2(10000);
+Mortgage_FEE NUMBER;
+Mortgage_FEE_Percent VARCHAR2(100);
+Mulkiya_Transfer_FEE VARCHAR2(100);
+Valuation_FEE VARCHAR2(100);
+Property_Insurance VARCHAR2(100);
+Age_Error VARCHAR2(1000);
+DBR_Error VARCHAR2(1000);
+LTV_Error VARCHAR2(1000);
+temp_Value VARCHAR2(100);
+employee_found Number;
+loan_Processing_FEE NUMBER;
+Age_At_Maturity NUMBER;
+AGE_MATURITY NUMBER;
+MULKIYA_TRANSFER NUMBER;
+VALUATIONFEE NUMBER;
+PROPERTYFEE NUMBER;
+REQUESTED_LOAN_TENOR_ERROR VARCHAR2(1000);
+tempValuess NUMBER;
+VALUATIONFEE_ERROR VARCHAR2(1000);
+LOANTENOR_ERROR VARCHAR2(1000);
+MAX_CONSTRUCTION_AGE VARCHAR2(100);
+Pensioner_value VARCHAR2(100);
+Age_At_Maturity_Error VARCHAR2(100);
+loantype_modified VARCHAR2(1000);
+age_at_Maturity_syntax VARCHAR2(1000);
+Mulkiya_Transfer_error VARCHAR2(1000);
+Age_In_Days VARCHAR2(100);
+Interest_Serving_Period_local NUMBER;
+LTV_Local VARCHAR2(100);
+temp2 NUMBER;
+charges NUMBER;
+existingLoanEligibility NUMBER;
+otherfees NUMBER;
+maxLoanAmountPerProperty NUMBER;
+minAge NUMBER;
+LIMultiplicationFactor NUMBER;
+medicalExaminationAge NUMBER;
+medicalExaminationLoanAmount NUMBER;
+maxageinMonthsatend NUMBER;
+interestRate NUMBER;
+waiverMonths NUMBER;
+temp3 VARCHAR2(100);
+amortizationID VARCHAR2(100);
+lastDate DATE;
+tempYear NUMBER;
+tempMonth NUMBER;
+tempDays NUMBER;
+tempWaiverMonths NUMBER;
+temp4 NUMBER;
+startDate DATE;
+maxAmount12 NUMBER;
+constructionTenorWithGracePeriod NUMBER;
+DATE_OF_BIRTH varchar2(50);
+BEGIN
+
+--INSERT INTO SIBAWDB.SP_TEMP VALUES(CUSTOMER_NAME 
+--, NATIONAL_ID 
+--, MOBILE_NUMBER 
+--, EMAIL_ID 
+--, EMPLOYERNAME  
+--, CHANNEL_TYPE  
+--, DATE_OF_ENQUIRY   
+--, NATIONALITY   
+--, EMPLOYER_SEGMENT   
+--, DATE_OF_BIRTH_MON   
+--, NET_SALARY   
+--, IS_EXISTING_LOAN   
+--, EXISTING_LOAN_BANK   
+--, EXISTING_LOAN_AMOUNT   
+--, IS_EXISTING_LOAN_SETTLEMENT   
+--, EXISTINGLOAN_INSTALLMENT   
+--, PRODUCT   
+--, LOANTYPE   
+--, INTEREST_RATE   
+--, LI_TYPE  
+--, LOAN_REQUESTED   
+--, LI_PROCESSING_FEE    
+--, IS_FIRST_BUY  
+--,LAND_VALUE  
+--,BUILDING_VALUE  
+--,ISMORTGAGE_FEE  
+--,ISMULKIYA_TRANSFER_FEE     
+--,ISVALUATION_FEE     
+--,ISPROPERTY_INSURANCE     
+--,VEHICLE_VALUE  
+--,SALARY_ASSIGNMENT  
+--,REQUESTED_LOAN_TENOR  
+--,ISEXCEPTION_CASE  
+--,REINSTATE_VALUE  
+--,INTEREST_SERVING_PERIOD  
+--,PENSIONER  
+--,ISPROCESSING_FEE  
+--,OTHER_FEE  
+--,IsWaiver );
+--commit;
+--------------------------------------------------------------------------------------------------------------------------------
+---CHECKS LOAN TENOR MAXIMUM LOAN TENOR REQUESTED_LOAN_TENOR REQUESTED_LOAN_TENOR_ERROR Age_At_Maturity-----------
+--------------------------------------------------------------------------------------------------------------------------
+    charges:=0;
+    maxAmount12:=0;
+    IF(PENSIONER IS  NULL)
+    THEN
+    Pensioner_value:='0';
+    ELSE
+    Pensioner_value:= pensioner;
+    END IF;
+    SELECT CONDITION_VALUE INTO MAX_AGE FROM EMI_CONDITIONS WHERE CONDITION_TYPE = 'Max_age' AND LOAN_TYPE = PRODUCT AND END_DATE IS NULL and PENSIONER_FLAG = pensioner_value AND LR='Y';  
+
+
+            if(PRODUCT ='Auto Loan')
+        THEN
+            temp_Value:=CONCAT('Max_Loan_tenor_',SALARY_ASSIGNMENT);
+            SELECT CONDITION_VALUE INTO MAX_LOAN_TENOR FROM EMI_CONDITIONS WHERE CONDITION_TYPE = temp_Value AND LOAN_TYPE = PRODUCT AND END_DATE IS NULL AND PENSIONER_FLAG = pensioner_value AND LR='Y';  
+
+        ELSE
+
+             SELECT CONDITION_VALUE INTO MAX_LOAN_TENOR FROM EMI_CONDITIONS WHERE CONDITION_TYPE = 'Max_Loan_tenor' AND LOAN_TYPE = PRODUCT AND END_DATE IS NULL AND PENSIONER_FLAG = pensioner_value AND LR='Y';     
+
+        END IF; 
+       
+        DATE_OF_BIRTH := DATE_OF_BIRTH_MON;
+        --TO_DATE(TO_CHAR(DATE_OF_BIRTH_MON), 'DD-MM-YYYY');
+        --TO_CHAR(TO_DATE(DATE_OF_BIRTH_MON, 'DD-MM-YYYY'), 'DD-Mon-YYYY');
+        --DATE_OF_BIRTH_MON
+        if( EXTRACT(DAY FROM SYSDATE) >26)
+        THEN
+             AGE_IN_MONTHS := MONTHS_BETWEEN(SYSDATE,TO_DATE(DATE_OF_BIRTH));
+        ELSE
+        AGE_IN_MONTHS := MONTHS_BETWEEN(TO_DATE(CONCAT(CONCAT(CONCAT('26','-'),CONCAT(EXTRACT(MONTH FROM SYSDATE),'-')),EXTRACT(YEAR FROM SYSDATE)),'dd-MM-YYYY'),TO_DATE(DATE_OF_BIRTH)) ;
+        END IF;
+        IF(INTEREST_SERVING_PERIOD is not null)
+        THEN
+          AGE_IN_MONTHS :=AGE_IN_MONTHS +TO_NUMBER(INTEREST_SERVING_PERIOD);
+        END IF;
+    SELECT TO_NUMBER(CONDITION_VALUE) INTO minAge FROM EMI_CONDITIONS WHERE CONDITION_TYPE = 'Minimum_Age' AND LOAN_TYPE = PRODUCT AND END_DATE IS NULL AND PENSIONER_FLAG = pensioner_value AND LR='Y';     
+    waiverMonths:=0;
+    IF(IsWaiver ='YES')
+    THEN
+
+       select FN_CALCULATE_WAIVER_MONTHS(TO_NUMBER(REQUESTED_LOAN_TENOR),MAX_LOAN_TENOR) into waiverMonths from dual;
+        maxageinMonthsatend:=MAX_LOAN_TENOR+waiverMonths;
+        Loan_Tenor:=TO_NUMBER(REQUESTED_LOAN_TENOR)+waiverMonths;
+
+        Age_At_Maturity :=( AGE_IN_MONTHS+TO_NUMBER(REQUESTED_LOAN_TENOR)+waiverMonths)/12;
+    END IF;
+
+    IF(AGE_IN_MONTHS>minAge)
+    THEN   
+        IF(REQUESTED_LOAN_TENOR <=MAX_LOAN_TENOR)
+        THEN
+            IF( AGE_IN_MONTHS+waiverMonths < MAX_AGE )
+            THEN
+
+                IF(MAX_AGE-AGE_IN_MONTHS-waiverMonths>MAX_LOAN_TENOR)
+                THEN
+                    --Floor(MONTHS_BETWEEN(TO_DATE(CONCAT('01-JAN',EXTRACT(YEAR FROM SYSDATE)+1)),SYSDATE))
+
+                        maxageinMonthsatend:=MAX_LOAN_TENOR+waiverMonths;
+                        Loan_Tenor:=TO_NUMBER(REQUESTED_LOAN_TENOR);
+                        Age_At_Maturity :=( AGE_IN_MONTHS+TO_NUMBER(REQUESTED_LOAN_TENOR))/12;
+
+                ELSE
+                   --  select FN_CALCULATE_WAIVER_MONTHS(TO_NUMBER(REQUESTED_LOAN_TENOR),MAX_LOAN_TENOR) into waiverMonths from dual;
+                    IF(REQUESTED_LOAN_TENOR+waiverMonths<=MAX_AGE-AGE_IN_MONTHS)
+                    THEN
+
+                        maxageinMonthsatend:=  TRUNC(MAX_AGE-AGE_IN_MONTHS)-waiverMonths;
+                        Loan_Tenor:=TO_NUMBER(REQUESTED_LOAN_TENOR)+waiverMonths;
+                        Age_At_Maturity :=( AGE_IN_MONTHS+TO_NUMBER(REQUESTED_LOAN_TENOR)+waiverMonths)/12;
+
+                    ELSE
+                    tempWaiverMonths:=0;
+                        IF(IsWaiver ='YES')
+                        THEN
+                        select FN_CALCULATE_WAIVER_MONTHS((MAX_AGE-AGE_IN_MONTHS-waiverMonths),MAX_LOAN_TENOR) into waiverMonths from dual;
+                        waiverMonths:=waiverMonths+1;
+                        select FN_CALCULATE_WAIVER_MONTHS((MAX_AGE-AGE_IN_MONTHS-waiverMonths),MAX_AGE-AGE_IN_MONTHS-waiverMonths) into tempWaiverMonths from dual;
+
+                        END IF;
+                        Age_At_Maturity_Error:=CONCAT('Your requested loan tenor exceeds max age,Max loan tenor is:',
+                                                TRUNC(MAX_AGE-AGE_IN_MONTHS-waiverMonths-(waiverMonths-tempWaiverMonths)));
+                        Age_At_Maturity_Error:=CONCAT(Age_At_Maturity_Error,' Months');
+                        Loan_Tenor := 0;
+
+                END IF;
+              END IF;
+            ELSE
+             REQUESTED_LOAN_TENOR_ERROR:=CONCAT('You are not eligible Your age exceed max age:',(MAX_AGE/12));
+             Loan_Tenor := 0;
+
+
+            END IF;
+        ELSE
+        REQUESTED_LOAN_TENOR_ERROR:=CONCAT('Requested loan tenor is not eligible, Max loan Tenor is(Months):',MAX_LOAN_TENOR);
+        Loan_Tenor := 0;
+      --  REQUESTED_LOAN_TENOR_ERROR :='';
+        END IF;
+    ELSE
+        REQUESTED_LOAN_TENOR_ERROR:=CONCAT('You are not eligible as Your age not exceeds minimum age,Minimum age is:',(216/12));
+        Loan_Tenor := 0;
+        --REQUESTED_LOAN_TENOR_ERROR :='';    
+  END IF;
+
+    IF(INTEREST_SERVING_PERIOD IS NULL)
+    THEN
+    interest_serving_period_local:=0;
+    ELSE
+    interest_serving_period_local:=TO_NUMBER(INTEREST_SERVING_PERIOD)-1;
+    END IF;
+
+    IF(loan_tenor>0)
+    THEN
+        IF( LOANTYPE ='Construction' OR LOANTYPE ='Renovation/Maintainance')
+        THEN
+            SELECT CONDITION_VALUE INTO max_construction_age FROM emi_conditions WHERE  CONDITION_TYPE ='Max_Construction_Age' AND LOAN_TYPE = PRODUCT AND END_DATE IS NULL AND LR='Y';  
+            IF(interest_serving_period_local<=TO_NUMBER(max_construction_age))
+             THEN
+                 Loan_Tenor  := TO_NUMBER(REQUESTED_LOAN_TENOR)-TO_NUMBER(interest_serving_period_local);
+                 Age_At_Maturity :=( AGE_IN_MONTHS+TO_NUMBER(REQUESTED_LOAN_TENOR))/12;
+             ELSE
+                 LOANTENOR_ERROR:='';
+                 Loan_Tenor := 0;
+                 REQUESTED_LOAN_TENOR_ERROR :=CONCAT('you are not eligible as maximum interest serving period is:',max_construction_age);
+
+             END IF;
+
+        END IF;
+    END IF;    
+    IF(PRODUCT='Personal Loan')
+    THEN
+        IF(loan_tenor>0)
+        THEN
+            IF(interest_serving_period_local>0)
+            THEN
+                Loan_Tenor  := TO_NUMBER(REQUESTED_LOAN_TENOR)-TO_NUMBER(interest_serving_period_local);
+                --Age_At_Maturity :=( AGE_IN_MONTHS+TO_NUMBER(REQUESTED_LOAN_TENOR))/12;
+
+            END IF;
+        END IF;
+    END IF;
+
+        IF(ISEXCEPTION_CASE='YES')
+        THEN
+        Loan_Tenor := TO_NUMBER(REQUESTED_LOAN_TENOR);
+         Age_At_Maturity := (AGE_IN_MONTHS+Loan_Tenor)/12;
+
+                    IF(AGE_IN_MONTHS+Loan_Tenor>max_age)
+                    THEN
+                     Age_At_Maturity_Error:=CONCAT('You are not eligible as Your requested loan tenor exceeds max age,Max age is:',TRUNC((MAX_AGE/12),0));
+
+                    END IF;
+
+        END IF;
+        --Age_At_Maturity_Error :=Age_At_Maturity;
+
+
+
+ --------------------------------------------------------------------------------------------------------------------------------
+
+ ---------------------------------------------------------------------------------------------------------------------------------
+        tempValuess :=0;
+------Maximum Loan Amount
+        IF((AGE_IN_MONTHS+Loan_Tenor+waiverMonths)>max_age AND Loan_Tenor =0)
+        THEN
+        Age_At_Maturity_Error:='Age at maturity crossing the limit.';
+        tempValuess :=1;
+        END IF;
+        IF( LOANTYPE ='Construction')
+        THEN
+          constructionTenorWithGracePeriod  := TO_NUMBER(REQUESTED_LOAN_TENOR)+TO_NUMBER(interest_serving_period_local);
+          IF(MAX_LOAN_TENOR<constructionTenorWithGracePeriod)
+          THEN
+          tempValuess:=1;
+          REQUESTED_LOAN_TENOR_ERROR:=CONCAT('Requested loan tenor is not eligible, Max loan Tenor is(Months):',MAX_LOAN_TENOR-TO_NUMBER(INTEREST_SERVING_PERIOD));
+          END IF;
+        END IF;
+ IF((loan_tenor>0 OR ISEXCEPTION_CASE='YES' )and tempValuess=0)
+    THEN
+        IR := (TO_NUMBER(INTEREST_RATE)/12)/100;
+        max_loan_amount :=0;
+
+        IF(PRODUCT = 'Auto Loan')
+          THEN
+                SELECT CONDITION_VALUE INTO Sal_Percentage FROM EMI_CONDITIONS WHERE CONDITION_TYPE = 'sal_percentage' AND LOAN_TYPE = PRODUCT AND  END_DATE IS NULL AND PENSIONER_FLAG = pensioner_value AND LR='Y';     
+                max_loan_amount := vehicle_value * Sal_Percentage;
+                existingLoanEligibility:=max_loan_amount;
+                loan_amount_per_property_value:=max_loan_amount;
+          ELSE
+
+                SELECT CONDITION_VALUE INTO Sal_Percentage FROM EMI_CONDITIONS WHERE CONDITION_TYPE = 'sal_percentage' AND LOAN_TYPE = PRODUCT AND END_DATE IS NULL AND PENSIONER_FLAG = pensioner_value AND LR='Y';     
+
+                        max_loan_amount :=ROUND(TO_NUMBER(NET_SALARY))*sal_percentage*0.01;
+                        existingLoanEligibility:=max_loan_amount;
+
+
+                      IF(TO_NUMBER(EXISTINGLOAN_INSTALLMENT) IS NOT NULL)
+                     THEN
+                            IF(EXISTING_LOAN_BANK ='House Loan')
+                            THEN
+                            SELECT CONDITION_VALUE INTO Sal_Percentage FROM EMI_CONDITIONS WHERE CONDITION_TYPE = 'Max_DBR_HomeLoan%' AND LOAN_TYPE = PRODUCT AND END_DATE IS NULL AND PENSIONER_FLAG = pensioner_value AND LR='Y';     
+
+                            max_loan_amount :=ROUND(TO_NUMBER(NET_SALARY))*sal_percentage*0.01;
+
+                            END IF;
+
+                            IF(TO_NUMBER(EXISTINGLOAN_INSTALLMENT)>=max_loan_amount)
+                            THEN
+                                max_loan_amount:=0;
+                                LTV_Error:=CONCAT('Existing Loan Installment is More than Eligibility (RO) : ',existingLoanEligibility);
+                            ELSE
+                                        max_loan_amount:=max_loan_amount-TO_NUMBER(EXISTINGLOAN_INSTALLMENT);
+                                        max_loan_amount :=ROUND((((max_loan_amount)*( 1-(1/((1+IR)**Loan_Tenor)))/(IR))-1),3);
+                            END IF;
+                        ELSE
+
+                          IF(PRODUCT='House Loan')
+                          THEN
+                          max_loan_amount :=ROUND((((max_loan_amount*0.999)*( 1-(1/((1+IR)**Loan_Tenor)))/(IR))-1),3);
+
+                          ELSE
+                          max_loan_amount :=ROUND((((max_loan_amount)*( 1-(1/((1+IR)**Loan_Tenor)))/(IR))-1),3);
+                         END IF;
+                       END IF;
+                IF(ISEXCEPTION_CASE='YES')
+                THEN
+
+                Loan_Tenor:=requested_loan_tenor;
+
+                END IF;
+
+
+
+             /* IF(max_loan_amount!=0)
+                THEN
+                        EMI :=IR*max_loan_amount*((1+IR)**(Loan_Tenor+interest_serving_period_local))/(((1+IR)**(Loan_Tenor+interest_serving_period_local))-1);
+                    IF(EXISTINGLOAN_INSTALLMENT IS NOT NULL  )
+                      THEN 
+                        DBR:= ((EMI+EXISTINGLOAN_INSTALLMENT)/NET_SALARY)*100; 
+                      ELSE    
+                        DBR :=(EMI/NET_SALARY)*100;
+                      END IF ;
+                        temp4:=FN_CHECK_DBR(PRODUCT,DBR,EXISTING_LOAN_BANK,NET_SALARY,pensioner_value);
+                  IF(temp4!=0)
+                  THEN
+                    max_loan_amount:=TRUNC((max_loan_amount)*(100/CEIL(DBR))*(temp4/100)-1,5);
+                  END IF;
+                END IF;*/
+
+                IF(PRODUCT='House Loan' OR PRODUCT = 'HouseLoan-Pensioner')
+                THEN
+                    Total_Property_Value :=TO_NUMBER(LAND_VALUE)+TO_NUMBER(BUILDING_VALUE);
+                        IF(IS_FIRST_BUY = 'YES')
+                        THEN
+                            SELECT CONDITION_VALUE INTO LTV_Local FROM EMI_CONDITIONS WHERE CONDITION_TYPE = 'LoanToValue_NEW%' AND LOAN_TYPE = PRODUCT AND END_DATE IS NULL and PENSIONER_FLAG = pensioner_value AND LR='Y';  
+                        ELSE
+                            SELECT CONDITION_VALUE INTO LTV_Local FROM EMI_CONDITIONS WHERE CONDITION_TYPE = 'LoanToValue_OLD%' AND LOAN_TYPE = PRODUCT AND END_DATE IS NULL and PENSIONER_FLAG = pensioner_value AND LR='Y';  
+                        END IF;   
+                    maxLoanAmountPerProperty :=    (Total_Property_Value*0.01)*TO_NUMBER(LTV_Local); 
+                        IF(max_loan_amount>maxLoanAmountPerProperty)
+                        THEN
+                        max_loan_amount:=maxLoanAmountPerProperty;
+                        ELSE
+                        maxAmount12:=1;
+                        END IF;
+                END IF;
+
+                 IF( LOANTYPE ='Construction')
+                 THEN
+                        IF(TO_NUMBER(BUILDING_VALUE)<max_loan_amount)
+                        THEN
+                        max_loan_amount:=TO_NUMBER(BUILDING_VALUE);
+                        END IF;
+                 END IF;
+
+
+        END IF;
+
+
+
+
+       -------------LOAN PROCESSING FEE----------
+       loantype_modified :=CONCAT(loantype,' Processing FEE');
+--          dbms_output.put_line('353 waiverMonths');  
+        SELECT PROCESSING_FEE INTO PROCESSING_FEE FROM processing_fee_types WHERE LOAN_TYPE = PRODUCT AND processing_type = loantype_modified AND END_DATE IS NULL AND PENSIONER_FLAG = pensioner_value AND LR='Y';  
+        loan_Processing_FEE := PROCESSING_FEE +(PROCESSING_FEE*0.05);
+
+
+     /*   DATA_VALUE :=max_loan_amount;
+         DATA_FLAG := 'MAX LOAN AMOUNT';
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+       */ ---------------------------------------------------------------------------------------------------------------
+        -----House Loan Misceleneaus Calculation--------------------
+        --------------------------------------------------------------------------------------------------------------
+        --------------MORTGAGE FEE CALCULATION------------------------
+        IF(PRODUCT = 'House Loan' OR PRODUCT ='HouseLoan-Pensioner')
+        THEN
+            IF(ISMORTGAGE_FEE = 'YES')
+                THEN
+                    SELECT PROCESSING_FEE INTO Mortgage_FEE_Percent FROM processing_fee_types WHERE LOAN_TYPE = PRODUCT AND processing_type = 'Mortgage_FEE%' AND END_DATE IS NULL AND PENSIONER_FLAG = pensioner_value AND LR='Y';  
+                    Mortgage_FEE :=TO_NUMBER(LOAN_REQUESTED)*TO_NUMBER(Mortgage_FEE_Percent)*0.01;
+                ELSE
+                    Mortgage_FEE :=0;
+            END IF;
+
+            ------------------MULKIYA CALCULATION---------------------------------
+            temp2:=0;
+            IF(LOANTYPE ='Construction')
+            THEN
+            temp2:=1;
+            END IF;
+            IF(LOANTYPE ='Renovation/Maintainance')
+            THEN
+            temp2:=1;
+            END IF;
+            IF(temp2=1)
+            THEN
+                     MULKIYA_TRANSFER :=0;
+             ELSE
+                    IF(ISMULKIYA_TRANSFER_FEE IS NOT NULL)
+                        THEN
+
+                            Total_Property_Value :=TO_NUMBER(LAND_VALUE)+TO_NUMBER(BUILDING_VALUE);
+                            SELECT PROCESSING_FEE INTO Mulkiya_Transfer_FEE FROM processing_fee_types WHERE LOAN_TYPE = PRODUCT AND processing_type = 'Mulkiya_Transfer_FEE' AND end_date IS NULL AND PENSIONER_FLAG= pensioner_value AND LR='Y';  
+
+                            IF(TO_NUMBER(ISMULKIYA_TRANSFER_FEE) <=Total_Property_Value*TO_NUMBER(Mulkiya_Transfer_FEE))
+                                THEN
+                                    MULKIYA_TRANSFER :=TO_NUMBER(ISMULKIYA_TRANSFER_FEE);
+                                ELSE
+                                    MULKIYA_TRANSFER :=Total_Property_Value*TO_NUMBER(Mulkiya_Transfer_FEE);
+                                    Mulkiya_Transfer_error:='Mulkiya transfer fee is more than the eligible fee, replacing with max eligible amount';
+                            END IF;
+                            ELSE
+                            MULKIYA_TRANSFER :=0;
+
+                        END IF;
+             END IF;
+
+             -----------------Valuation FEE------------
+             -------------------------------------------------------
+             IF(ISVALUATION_FEE IS NOT NULL)
+             THEN
+                    SELECT PROCESSING_FEE INTO Valuation_FEE FROM processing_fee_types WHERE LOAN_TYPE = PRODUCT AND processing_type = 'Valuation_FEE' AND end_date IS NULL AND PENSIONER_FLAG= pensioner_value AND LR='Y';  
+                    VALUATIONFEE :=TO_NUMBER(ISVALUATION_FEE);
+                    IF(VALUATIONFEE > Valuation_FEE)
+                    THEN
+                    VALUATIONFEE :=TO_NUMBER(Valuation_FEE);
+                    VALUATIONFEE_ERROR :=CONCAT('Valuation Fee must be less than ',Valuation_FEE);
+                    VALUATIONFEE_ERROR :=CONCAT(VALUATIONFEE_ERROR,' so replaced with max value ');
+                    END IF;
+
+             ELSE
+                    VALUATIONFEE:=0;
+             END IF;
+
+             -------------------PROPERTY FEE_---------------------------
+             --------------------------------------------------
+             IF(LOANTYPE='Land Purchase')
+             THEN
+                    PROPERTYFEE:=0;
+             ELSE
+                 IF(ISPROPERTY_INSURANCE ='YES')
+                 THEN 
+
+
+                 SELECT PROCESSING_FEE INTO Property_Insurance FROM processing_fee_types WHERE LOAN_TYPE = PRODUCT AND processing_type = 'Property_Insurance' AND end_date is NULL AND PENSIONER_FLAG= pensioner_value AND LR='Y';   
+                    PROPERTYFEE:=REINSTATE_VALUE*(TO_NUMBER(Property_Insurance)/100);
+                    IF(PROPERTYFEE<30)
+                    THEN
+                    PROPERTYFEE:=30;
+                    END IF;
+                    PROPERTYFEE:=PROPERTYFEE+(PROPERTYFEE*(1.6/100));
+                    PROPERTYFEE:=ROUND(PROPERTYFEE+(PROPERTYFEE*0.05),3);
+                 ELSE
+                    PROPERTYFEE:=0;
+                 END IF;
+             END IF;
+        END IF;
+        --IF(ISMULKIYA_TRANSFER_FEE = 'YES')(09/05/22)
+       --  DISBURSED_LOAN_AMOUNT :=DISBURSED_LOAN_AMOUNT+TO_NUMBER(Mulkiya_Transfer_FEE); (09/05/2022)
+
+      ----------------------------------------------------------------------------------------------------------------------
+                        -- LIFE INSURANCES CALCULATION
+       -------------------------------------------------------------------------------------------------------------------------
+        IF(li_type ='Monthly')
+            THEN
+                IF(PRODUCT='House Loan' OR PRODUCT='HouseLoan-Pensioner' )
+                THEN
+                        IF(isprocessing_fee IS NOT NULL)
+                        THEN
+                            IF(isprocessing_fee='NO')
+                            THEN
+                            loan_Processing_FEE:=0;
+                            END IF;
+                        END IF;
+                     SELECT TO_NUMBER(PROCESSING_FEE) INTO LIMultiplicationFactor FROM processing_fee_types WHERE LOAN_TYPE = PRODUCT AND processing_type = 'Life_Insurance_Multiplication_Factor' AND end_date is NULL AND PENSIONER_FLAG= pensioner_value AND LR='Y';   
+                    LIFE_INSURANCE:= TO_NUMBER(LOAN_REQUESTED)+loan_Processing_FEE+PROPERTYFEE+VALUATIONFEE+MULKIYA_TRANSFER+Mortgage_FEE;
+                    LIFE_INSURANCE:=LIFE_INSURANCE+Calculate_Life_Insurance_Processing_Fee(li_type,LIFE_INSURANCE,PRODUCT,0);
+                    LIFE_INSURANCE:=ROUND((((TO_NUMBER(LIFE_INSURANCE))/1000)*LIMultiplicationFactor)+(((TO_NUMBER(LIFE_INSURANCE))/1000)*LIMultiplicationFactor)*0.0055,3);
+                    LIFE_INSURANCE:=ROUND(LIFE_INSURANCE+(((TO_NUMBER(LIFE_INSURANCE))/1000)*LIMultiplicationFactor)+(((TO_NUMBER(LIFE_INSURANCE))/1000)*LIMultiplicationFactor)*0.0055,3);
+                    LIFE_IN_PROCESSING_FEE_CHARGES:=TO_NUMBER(LOAN_REQUESTED)+loan_Processing_FEE+PROPERTYFEE+VALUATIONFEE+MULKIYA_TRANSFER+Mortgage_FEE;
+                    LIFE_IN_PROCESSING_FEE_CHARGES :=Calculate_Life_Insurance_Processing_Fee(li_type,LIFE_IN_PROCESSING_FEE_CHARGES,Product,0);
+
+                END IF;
+
+                IF(PRODUCT='Personal Loan' OR PRODUCT='PersonalLoan-Pensioner' )
+                THEN
+                     SELECT TO_NUMBER(PROCESSING_FEE) INTO LIMultiplicationFactor FROM processing_fee_types WHERE LOAN_TYPE = PRODUCT AND processing_type = 'Life_Insurance_Multiplication_Factor' AND end_date is NULL AND PENSIONER_FLAG= pensioner_value AND LR='Y';   
+                     LIFE_INSURANCE:= TO_NUMBER(LOAN_REQUESTED);
+                    LIFE_INSURANCE:=((TO_NUMBER(LOAN_REQUESTED)/1000)*LIMultiplicationFactor);
+                    LIFE_INSURANCE :=LIFE_INSURANCE+(LIFE_INSURANCE*0.0055);
+               -- LIFE_INSURANCE:=LIFE_INSURANCE+ROUND(LIFE_INSURANCE*0.00055,3);
+                END IF;
+                   IF(PRODUCT='Reschedule-Pensioner' )
+                THEN
+                    SELECT PROCESSING_FEE INTO life_in_processing_fee_charges FROM processing_fee_types WHERE LOAN_TYPE = PRODUCT AND processing_type = 'Insurance_Admin_charges' AND end_date is NULL AND PENSIONER_FLAG= pensioner_value AND LR='Y';   
+                   LIFE_INSURANCE:= TO_NUMBER(LOAN_REQUESTED)+TO_NUMBER(loan_processing_fee)+TO_NUMBER(life_in_processing_fee_charges);
+                LIFE_INSURANCE:=((TO_NUMBER(LIFE_INSURANCE)/1000)*0.255);
+                LIFE_INSURANCE :=ROUND(LIFE_INSURANCE+(LIFE_INSURANCE*0.0055),3);
+
+                END IF;          -- LIFE_INSURANCE:=(((TO_NUMBER(LIFE_INSURANCE))/1000)*0.255)+ROUND((((TO_NUMBER(LOAN_REQUESTED))/1000)*0.255)*0.0055,3);
+            END IF;
+            IF(li_type ='Upfront')
+            THEN
+                IF(PRODUCT='House Loan' OR PRODUCT ='HouseLoan-Pensioner')
+                THEN
+                 SELECT TO_NUMBER(PROCESSING_FEE) INTO LIMultiplicationFactor FROM processing_fee_types WHERE LOAN_TYPE = PRODUCT AND processing_type = 'Life_Insurance_Multiplication_Factor' AND end_date is NULL AND PENSIONER_FLAG= pensioner_value AND LR='Y';   
+
+                LIFE_INSURANCE:=(((TO_NUMBER(LOAN_REQUESTED))/1000)*LIMultiplicationFactor*loan_tenor)+ROUND((((TO_NUMBER(LOAN_REQUESTED))/1000)*LIMultiplicationFactor*loan_tenor)*0.0055,3);
+                LIFE_INSURANCE:= TO_NUMBER(LOAN_REQUESTED)+loan_Processing_FEE+PROPERTYFEE+VALUATIONFEE+MULKIYA_TRANSFER+Mortgage_FEE;
+                LIFE_INSURANCE:=LIFE_INSURANCE+Calculate_Life_Insurance_Processing_Fee(li_type,LIFE_INSURANCE,PRODUCT,0);
+                LIFE_INSURANCE:=ROUND(LIFE_INSURANCE*(1/(1-0.2*Loan_Tenor*0.0010055)-1),3);
+               -- LIFE_INSURANCE:=LIFE_INSURANCE+ROUND(LIFE_INSURANCE*(1/(1-0.2*Loan_Tenor*0.0010055)-1),3);
+                LIFE_IN_PROCESSING_FEE_CHARGES:=TO_NUMBER(LOAN_REQUESTED)+loan_Processing_FEE+PROPERTYFEE+VALUATIONFEE+MULKIYA_TRANSFER+Mortgage_FEE;
+                 LIFE_IN_PROCESSING_FEE_CHARGES :=Calculate_Life_Insurance_Processing_Fee(li_type,LIFE_IN_PROCESSING_FEE_CHARGES,Product,0);
+
+                ELSE
+                    IF(PRODUCT='Auto Loan')
+                    THEN
+                    --LIFE_INSURANCE:= TO_NUMBER(LOAN_REQUESTED)+loan_Processing_FEE;
+                   -- LIFE_INSURANCE:=Calculate_Life_Insurance_Processing_Fee(li_type,LIFE_INSURANCE,PRODUCT,0);
+                   -- LIFE_INSURANCE:=round((((TO_NUMBER(LOAN_REQUESTED))/1000)*0.255*loan_tenor)+ROUND((((TO_NUMBER(LOAN_REQUESTED))/1000)*0.255*loan_tenor)*0.0055,3),3);
+                    LIFE_INSURANCE:= TO_NUMBER(LOAN_REQUESTED)+loan_Processing_FEE;
+                    LIFE_INSURANCE:=LIFE_INSURANCE+Calculate_Life_Insurance_Processing_Fee(li_type,LIFE_INSURANCE,PRODUCT,loan_Processing_FEE);
+
+                    LIFE_INSURANCE:=ROUND(LIFE_INSURANCE*(1/(1-0.255*Loan_Tenor*0.0010055)-1),3);
+
+                    ELSE
+                            IF(PRODUCT='Personal Loan' or PRODUCT='PersonalLoan-Pensioner')
+                            THEN
+
+                                 SELECT TO_NUMBER(PROCESSING_FEE) INTO LIMultiplicationFactor FROM processing_fee_types WHERE LOAN_TYPE = PRODUCT AND processing_type = 'Life_Insurance_Multiplication_Factor' AND end_date is NULL AND PENSIONER_FLAG= pensioner_value AND LR='Y';   
+
+                                --LIFE_INSURANCE:= TO_NUMBER(LOAN_REQUESTED)+loan_Processing_FEE;
+                                LIFE_INSURANCE:=loan_Processing_FEE;
+                                LIFE_INSURANCE:=LIFE_INSURANCE+Calculate_Life_Insurance_Processing_Fee('Monthly',LIFE_INSURANCE,PRODUCT,loan_Processing_FEE);
+                               LIFE_INSURANCE:=LOAN_REQUESTED;---LIFE_INSURANCE;
+
+                                LIFE_INSURANCE:= ((LIFE_INSURANCE *((1/ (1-(TO_NUMBER(REQUESTED_LOAN_TENOR)*LIMultiplicationFactor*(1+(0.55/100))) /1000))-1))/(1+(0.55/100)))+((LIFE_INSURANCE *((1/ (1-(TO_NUMBER(REQUESTED_LOAN_TENOR)*LIMultiplicationFactor*(1+(0.55/100))) /1000))-1))/(1+(0.55/100)))*(0.55/100);
+                                LIFE_INSURANCE:=ROUND(LIFE_INSURANCE,3);
+
+                                --LIFE_INSURANCE:=ROUND(LOAN_REQUESTED*(1/(1-(LIMultiplicationFactor*Loan_Tenor*1.0055)/1000-1),3);
+                            ELSE
+                                SELECT TO_NUMBER(PROCESSING_FEE) INTO LIMultiplicationFactor FROM processing_fee_types WHERE LOAN_TYPE = PRODUCT AND processing_type = 'Life_Insurance_Multiplication_Factor' AND end_date is NULL AND PENSIONER_FLAG= pensioner_value AND LR='Y';   
+                                LIFE_INSURANCE:= TO_NUMBER(LOAN_REQUESTED)+loan_Processing_FEE;
+                                LIFE_INSURANCE:=LIFE_INSURANCE+Calculate_Life_Insurance_Processing_Fee(li_type,LIFE_INSURANCE,PRODUCT,loan_Processing_FEE);
+
+                                LIFE_INSURANCE:=ROUND(LIFE_INSURANCE*(1/(1-LIMultiplicationFactor*Loan_Tenor*0.0010055)-1),3);
+
+                            END IF;
+                            --LIFE_INSURANCE:=round((((TO_NUMBER(LOAN_REQUESTED))/1000)*0.255*loan_tenor)+ROUND((((TO_NUMBER(LOAN_REQUESTED))/1000)*0.255*loan_tenor)*0.0055,3),3);
+                    END IF;     
+                END IF;
+
+            END IF;
+            IF(li_type ='Outside Cover')
+            THEN
+                LIFE_INSURANCE:=0;
+                life_in_processing_fee_charges:=0;
+            END IF;
+            IF(li_type ='Out Side insurance')
+            THEN
+                LIFE_INSURANCE:=0;
+                life_in_processing_fee_charges:=0;
+            END IF;
+            IF(li_type ='Aman')
+            THEN
+
+               LIFE_INSURANCE:= TO_NUMBER(LOAN_REQUESTED)+loan_Processing_FEE+PROPERTYFEE+VALUATIONFEE+MULKIYA_TRANSFER+Mortgage_FEE;
+               LIFE_INSURANCE:=ROUND(LIFE_INSURANCE*(1/(1-0.2*(Loan_Tenor+TO_NUMBER(interest_serving_period_local))*0.0010055)-1),3);
+               life_in_processing_fee_charges:=0;
+            END IF;
+            IF(li_type ='Aman Plus')
+            THEN
+                LIFE_INSURANCE:= TO_NUMBER(LOAN_REQUESTED)+loan_Processing_FEE+PROPERTYFEE+VALUATIONFEE+MULKIYA_TRANSFER+Mortgage_FEE;
+                LIFE_INSURANCE:=ROUND(LIFE_INSURANCE*(1/(1-0.25*(Loan_Tenor+TO_NUMBER(interest_serving_period_local))*0.0010055)-1),3);
+                life_in_processing_fee_charges:=0;
+            END IF;
+            IF(li_type ='Customer Provided')
+            THEN
+                LIFE_INSURANCE:= 0;
+                life_in_processing_fee_charges:=0;
+            END IF;
+ ---------------------------------------------------------------------------------------------------------------------------------
+         ----------------------Disbursed Loan Amount Calculation----------------------
+ --------------------------------------------------------------------------------------------------------------------------------------
+        IF(PRODUCT ='Auto Loan')
+         THEN
+              if(LIFE_INSURANCE = 0)
+              THEN
+                  DISBURSED_LOAN_AMOUNT :=TO_NUMBER(LOAN_REQUESTED)+TO_NUMBER(PROCESSING_FEE);
+                  charges:=TO_NUMBER(PROCESSING_FEE); 
+              ELSE
+                LIFE_IN_PROCESSING_FEE_CHARGES :=Calculate_Life_Insurance_Processing_Fee(li_type,LOAN_REQUESTED,PRODUCT,loan_Processing_FEE);
+                 DISBURSED_LOAN_AMOUNT :=TO_NUMBER(LOAN_REQUESTED)+TO_NUMBER(PROCESSING_FEE)+LIFE_INSURANCE+life_in_processing_fee_charges; 
+                 charges:=TO_NUMBER(PROCESSING_FEE)+LIFE_INSURANCE+life_in_processing_fee_charges; 
+             END IF;
+
+
+        END IF;
+
+        IF(PRODUCT ='House Loan' OR PRODUCT ='HouseLoan-Pensioner' )
+         THEN
+            IF(OTHER_FEE IS NOT NULL)
+            THEN 
+            otherfees:=TO_NUMBER(OTHER_FEE);
+            ELSE
+            otherfees:=0;
+            END IF;
+         DISBURSED_LOAN_AMOUNT :=TO_NUMBER(LOAN_REQUESTED)+loan_Processing_FEE+life_in_processing_fee_charges+PROPERTYFEE+VALUATIONFEE+MULKIYA_TRANSFER+Mortgage_FEE+LIFE_INSURANCE+otherfees;     
+            charges:=loan_Processing_FEE+life_in_processing_fee_charges+PROPERTYFEE+VALUATIONFEE+MULKIYA_TRANSFER+Mortgage_FEE+LIFE_INSURANCE;     
+--            IF(maxAmount12=1)
+--            THEN
+--
+--            max_loan_amount:=ROUND(LOAN_MAX_AMOUNT(ISMORTGAGE_FEE,MULKIYA_TRANSFER,VALUATIONFEE,ISPROPERTY_INSURANCE,isprocessing_fee,
+--                            li_type,otherfees,LOANTYPE,PRODUCT,MAX_LOAN_AMOUNT,PENSIONER,LAND_VALUE,BUILDING_VALUE,LOAN_TENOR,
+--                            REINSTATE_VALUE,MAX_LOAN_AMOUNT,charges,INTEREST_SERVING_PERIOD),3);
+--            END IF;
+        END IF;
+
+        IF(PRODUCT ='Personal Loan' OR PRODUCT='PersonalLoan-Pensioner')
+        THEN
+
+        LIFE_IN_PROCESSING_FEE_CHARGES:= Calculate_Life_Insurance_Processing_Fee(li_type,LOAN_REQUESTED,PRODUCT,loan_Processing_FEE);
+                DISBURSED_LOAN_AMOUNT :=TO_NUMBER(LOAN_REQUESTED);
+
+                --interest serving period
+                if(interest_serving_period_local is not null AND interest_serving_period_local >1)
+                THEN
+                interestRate := ((INTEREST_RATE*0.01)/12)*DISBURSED_LOAN_AMOUNT;
+                DISBURSED_LOAN_AMOUNT := DISBURSED_LOAN_AMOUNT;--(interestRate*interest_serving_period_local);
+                END IF;
+        END IF;
+        IF(PRODUCT='Reschedule-Pensioner' )
+        THEN
+
+                     DISBURSED_LOAN_AMOUNT :=TO_NUMBER(LOAN_REQUESTED)+TO_NUMBER(loan_processing_fee)+life_insurance+TO_NUMBER(life_in_processing_fee_charges);
+                     charges:=TO_NUMBER(loan_processing_fee)+life_insurance+TO_NUMBER(life_in_processing_fee_charges);
+
+        END IF;
+
+
+---------------------------------------------------------------------------------------------------------------------
+---------------------------CHECKING LOANN TO VALUE(MAXIMUM LOAN AMOUNT)----------------------
+------------------------------------------------------------------------------------------------------------------------------
+        IF(max_loan_amount != -1)
+        THEN
+
+                IF(max_loan_amount<TO_NUMBER(loan_requested))
+                  THEN
+                        IF(ISEXCEPTION_CASE='YES')
+                        THEN
+                       LTV_Error :=CONCAT('Entered amount is more than the eligibility',max_loan_amount);
+                        ELSE
+                        LTV_Error :=CONCAT('Entered amount is more than the eligibility',max_loan_amount);
+                        DISBURSED_LOAN_AMOUNT :=0;
+                        END IF;
+                  ELSE
+                        LTV_Error :=0;
+                 END IF;
+        ELSE
+                DISBURSED_LOAN_AMOUNT :=0;
+        END IF;
+
+
+
+  -------------------------------------------------------------------------------------------------------------------------------
+
+  ----------------------------------------------------------------------------------------------------------------------------------
+    if(PRODUCT = 'House Loan' OR PRODUCT ='HouseLoan-Pensioner')
+    THEN
+            Total_Property_Value :=TO_NUMBER(LAND_VALUE)+TO_NUMBER(BUILDING_VALUE);
+            Loan_Amount_Per_Property_Value :=ROUND(((TO_NUMBER(LOAN_REQUESTED)/Total_Property_Value)*100),1);
+    END IF;
+ ------------------------------------------------------------------------------------------------------------------------------
+ ---------------CHECKS DISBURSED LOAN AMOUNT GREATER THAN ZERO ELSE RESULT WILL BE 0 AND CALCULATES EMI DBR MAX------------
+ --------------------------------------------------------------------------------------------------------------------------------
+-- Age_At_Maturity_Error:=NULL;
+  IF(DISBURSED_LOAN_AMOUNT>0)
+  THEN
+         IF(PRODUCT='Personal Loan')
+        THEN
+            temp3:= TO_CHAR(SYSDATE,'YYYY')||'-'||TO_CHAR(ADD_MONTHS(SYSDATE,interest_serving_period_local),'Mon')||'-'||'26';
+            SELECT CEIL(TO_DATE(temp3,'YYYY-Mon-DD')-SYSDATE) into  temp2  from dual;
+            temp2:=((DISBURSED_LOAN_AMOUNT * (TO_NUMBER(INTEREST_RATE))/100) / 365) * temp2;
+        END IF;
+        IF(PRODUCT!='House Loan' OR  PRODUCT !='HouseLoan-Pensioner')
+        THEN
+              EMI :=IR*DISBURSED_LOAN_AMOUNT*((1+IR)**(Loan_Tenor+interest_serving_period_local))/(((1+IR)**(Loan_Tenor+interest_serving_period_local))-1);
+              select SQ_LOANCALCULATOR_SQ.NEXTVAL into amortizationID from dual;
+              IF(TO_NUMBER(interest_serving_period_local)>=0 and TO_NUMBER(INTEREST_SERVING_PERIOD) is not null)
+              THEN
+                  SP_BUILD_LOAN_AMORTIZATION(EMI+0.0001,ROUND(DISBURSED_LOAN_AMOUNT,3),INTEREST_RATE,TO_NUMBER(interest_serving_period_local)+1,IsWaiver,amortizationID,temp2,PRODUCT);
+              ELSE
+                  SP_BUILD_LOAN_AMORTIZATION(EMI+0.0001,ROUND(DISBURSED_LOAN_AMOUNT,3),INTEREST_RATE,TO_NUMBER(interest_serving_period_local),IsWaiver,amortizationID,temp2,PRODUCT);
+              END IF;
+        ELSE
+              EMI :=IR*DISBURSED_LOAN_AMOUNT*((1+IR)**(TO_NUMBER(REQUESTED_LOAN_TENOR)))/(((1+IR)**(TO_NUMBER(REQUESTED_LOAN_TENOR)))-1);
+              select SQ_LOANCALCULATOR_SQ.NEXTVAL into amortizationID from dual;
+              SP_BUILD_LOAN_AMORTIZATION(EMI+0.0001,ROUND(DISBURSED_LOAN_AMOUNT,3),INTEREST_RATE,TO_NUMBER(interest_serving_period_local),IsWaiver,amortizationID,temp2,PRODUCT);
+        END IF;
+
+        select MAX(EMI_DUE_DATE) into lastDate from TBL_AMORITIZATION WHERE SL_NO=(SELECT MAX(SL_NO) FROM tbl_amoritization where SL_ID = amortizationID) and SL_ID = amortizationID;
+        IF(MONTHS_BETWEEN(lastDate,TO_DATE(DATE_OF_BIRTH))<=MAX_AGE)
+        THEN
+            Age_At_Maturity_Error:=NULL;
+            temp3:=NULL;
+        ELSE
+            temp4:=(TRUNC(MONTHS_BETWEEN(lastDate,TO_DATE(DATE_OF_BIRTH)))-MAX_AGE+1);
+            SELECT count(*) into temp2 FROM TBL_AMORITIZATION WHERE SL_NO BETWEEN (SELECT MAX(SL_NO)-10 FROM tbl_amoritization WHERE SL_ID = amortizationID)
+            AND (SELECT MAX(SL_NO) FROM tbl_amoritization WHERE SL_ID = amortizationID) AND SL_ID = amortizationID AND tbl_amoritization.emi_no is null;
+
+            IF(IsWaiver ='YES')
+            THEN
+              Age_At_Maturity_Error:='Loan At maturity Crossing Max Tenor because of waiver, Please Reduce Tenor By '||(TRUNC(MONTHS_BETWEEN(lastDate,TO_DATE(DATE_OF_BIRTH)))-MAX_AGE+1-temp2)||' Month(s)';
+            END IF;
+            IF(ISEXCEPTION_CASE='YES')
+            THEN
+                    temp3:=NULL;
+            ELSE
+                    temp3:='123';
+            END IF;
+        END IF;
+  END IF;
+ IF(DISBURSED_LOAN_AMOUNT>0 AND temp3 IS  NULL)----start of DISBURSED_LOAN_AMOUNT>0
+   THEN
+        IF(EXISTINGLOAN_INSTALLMENT IS NOT NULL  )
+        THEN 
+            DBR:= TRUNC(((EMI+EXISTINGLOAN_INSTALLMENT)/NET_SALARY)*100,2); 
+        ELSE    
+            DBR :=TRUNC((EMI/NET_SALARY)*100,2);
+        END IF ;
+
+         ---------------------------------------------------------------------------------------------------------------------------
+         --------------------EXception Case--------------------------------
+        ------------------------------------------------------------------------------------------------------------------------
+        IF(ISEXCEPTION_CASE='YES')
+        THEN
+
+        MAX_LOAN_TENOR:=TO_NUMBER(requested_loan_tenor);
+        max_loan_amount:=TO_NUMBER(loan_requested);
+        END IF;
+        --------------------------------------------------------------------------------------------------------------------------
+        ----RESULTS---------------------
+        -----------------------------------------------
+        ----------1----------
+        DATA_FLAG :='LIFE_IN_PROCESSING_FEE_CHARGES';
+        DATA_VALUE :=ROUND(LIFE_IN_PROCESSING_FEE_CHARGES,3);
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        ------------2------------
+        DATA_FLAG :='DISBURSED_LOAN_AMOUNT';
+        DATA_VALUE :=ROUND(DISBURSED_LOAN_AMOUNT,3);
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        ----------3-----------
+        DATA_FLAG := 'MAX_LOAN_TENOR';
+        DATA_VALUE :=ROUND(requested_loan_tenor,3);
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        ----------4---------
+        DATA_FLAG := 'MAX_LOAN_AMOUNT';
+        DATA_VALUE :=ROUND(max_loan_amount,3);
+
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        --------------------5--------
+        DATA_FLAG := 'EMI';
+        DATA_VALUE :=ROUND(EMI,3);
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        -------------6------------
+        DATA_FLAG := 'DBR%';
+        DATA_VALUE :=TRUNC(DBR,3);
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        -----------7---------
+        DATA_FLAG := 'Total_Property_Value%';
+         DATA_VALUE :=Total_Property_Value;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        --------8----------
+          DATA_FLAG := 'Loan_Amount_Per_Property_Value%';
+          DATA_VALUE :=Loan_Amount_Per_Property_Value;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        ----------------------------------------------------------------------------------------------------------------------------------------
+        ----------------------Checks Existing Home Loan Condition--------------------
+        ------------------------------------------------------------------------------------------------------------------------------------
+
+        IF(EXISTING_LOAN_BANK ='House Loan')
+        THEN
+                IF(PRODUCT!='House Loan' OR  PRODUCT !='HouseLoan-Pensioner')
+                THEN
+                SELECT CONDITION_VALUE INTO temp_Value FROM emi_conditions where LOAN_TYPE = PRODUCT and CONDITION_TYPE = 'Max_DBR_HomeLoan%' AND END_DATE IS NULL AND PENSIONER_FLAG = pensioner_value AND LR='Y';    
+                ELSE
+                SELECT CONDITION_VALUE INTO temp_Value FROM emi_conditions where LOAN_TYPE = PRODUCT and CONDITION_TYPE = 'Max_DBR%' AND END_DATE IS NULL AND PENSIONER_FLAG = pensioner_value AND LR='Y';    
+                END IF;
+        ELSE
+                SELECT CONDITION_VALUE INTO temp_Value FROM emi_conditions where LOAN_TYPE = PRODUCT and CONDITION_TYPE = 'Max_DBR%' AND END_DATE IS NULL AND PENSIONER_FLAG = pensioner_value AND LR='Y';    
+
+        END IF;
+        DBR_Error :=FN_CHECK_DBR(PRODUCT,DBR,EXISTING_LOAN_BANK,NET_SALARY,pensioner_value);
+        IF(TO_NUMBER(DBR_Error)!=0)
+        THEN
+        DBR_Error :=CONCAT('DBR must be less than ',DBR_Error);        
+        END IF;
+
+        ----------------------------------------------------------------------------------------------------------------------------------------
+
+          -------9----------------------------------
+          DATA_FLAG :='Age Error';
+          DATA_VALUE := Age_Error;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          -----10------
+          DATA_FLAG :='DBR_Error';
+          DATA_VALUE := DBR_Error;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ------------11---
+          IF(PRODUCT='House Loan' or PRODUCT='HouseLoan-Pensioner')
+          THEN
+             IF(IS_FIRST_BUY = 'YES')
+             THEN
+                SELECT CONDITION_VALUE INTO LTV_Local FROM EMI_CONDITIONS WHERE CONDITION_TYPE = 'LoanToValue_NEW%' AND LOAN_TYPE = PRODUCT AND END_DATE IS NULL and PENSIONER_FLAG = pensioner_value AND LR='Y';  
+             ELSE
+                SELECT CONDITION_VALUE INTO LTV_Local FROM EMI_CONDITIONS WHERE CONDITION_TYPE = 'LoanToValue_OLD%' AND LOAN_TYPE = PRODUCT AND END_DATE IS NULL and PENSIONER_FLAG = pensioner_value AND LR='Y';  
+             END IF;
+             IF(Loan_Amount_Per_Property_Value>TO_NUMBER(LTV_Local))
+             THEN
+                  LTV_Error:=CONCAT('LTV IS More than Eligibility,Eligible Percentage is(In %):',LTV_Local);
+             END IF;
+          END IF;
+          DATA_FLAG :='LTV_Error';
+          DATA_VALUE := LTV_Error;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ----------12---------
+          DATA_FLAG :='Employee_Not_FOUND';
+          employee_found :=0;
+          SELECT COUNT(EMPLOYER_NAME) INTO employee_found FROM EMP_TABLE WHERE EMPLOYER_NAME = EMPLOYERNAME ;
+          if(employee_found = 0)
+          THEN
+              DATA_VALUE :='Employer is not in the list , Please refer approval list';
+          ELSE
+              DATA_VALUE :='';
+          END IF;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ----------13---------
+          DATA_FLAG := 'REQUESTED_LOAN_TENOR_ERROR';
+          DATA_VALUE :=REQUESTED_LOAN_TENOR_ERROR;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ---------14----------
+          DATA_FLAG := 'Above_100K_Error';
+          SELECT TO_NUMBER(CONDITION_VALUE) INTO medicalExaminationLoanAmount FROM emi_conditions where LOAN_TYPE = PRODUCT and CONDITION_TYPE = 'MedicalExamination_Loan_Limit' AND END_DATE IS NULL AND PENSIONER_FLAG = pensioner_value AND LR='Y';    
+          SELECT TO_NUMBER(CONDITION_VALUE) INTO medicalExaminationAge FROM emi_conditions where LOAN_TYPE = PRODUCT and CONDITION_TYPE = 'MedicalExamination_Age' AND END_DATE IS NULL AND PENSIONER_FLAG = pensioner_value AND LR='Y';    
+          if(DISBURSED_LOAN_AMOUNT>=medicalExaminationLoanAmount)
+          THEN
+                DATA_VALUE:= CONCAT('Medical Examination Required Loan breached RO ',medicalExaminationLoanAmount);
+          ELSE
+                DATA_VALUE:='';
+          END IF;
+          SELECT TO_NUMBER(CONDITION_VALUE) INTO medicalExaminationAge FROM emi_conditions where LOAN_TYPE = PRODUCT and CONDITION_TYPE = 'MedicalExamination_Age' AND END_DATE IS NULL AND PENSIONER_FLAG = pensioner_value AND LR='Y';    
+          if(medicalExaminationAge <=AGE_IN_MONTHS)
+          THEN
+             DATA_VALUE:= CONCAT('Medical Examination Required age is above(years): ',medicalExaminationAge/12);
+          END IF;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+       --------------------------------------------------------------------------------------------
+       -------------------Exceptions Completed Filling VALUES
+       -----------------------------------------------------------------------------------------
+          -------15---------
+
+          DATA_FLAG:='Age_At_Maturity';
+          age_at_Maturity_syntax:=   trunc(months_between(lastDate,TO_DATE(DATE_OF_BIRTH))/12)||' Year(s) '
+                                      ||trunc(mod(months_between(lastDate,TO_DATE(DATE_OF_BIRTH)),12)) || ' Month(s) '
+                                      ||trunc(lastDate-add_months(TO_DATE(DATE_OF_BIRTH),trunc(months_between(lastDate,TO_DATE(DATE_OF_BIRTH))/12)*12+trunc(mod(months_between(lastDate,TO_DATE(DATE_OF_BIRTH)),12))))
+                                      || ' Day(s)';
+          DATA_VALUE :=age_at_Maturity_syntax;--ROUND(age_at_maturity,3);
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          -------16---------
+          DATA_FLAG := 'Loan_Processing_FEE_With_VAT';
+          DATA_VALUE :=ROUND(loan_Processing_FEE,3);
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ------17-------
+          DATA_FLAG := 'PROPERTY FEE';
+          DATA_VALUE:=PROPERTYFEE; 
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         ------------18---------
+          DATA_FLAG := 'LIFE_INSURANCE_FEE_WITH_VAT';
+          DATA_VALUE:=LIFE_INSURANCE; 
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ------------19---------
+          DATA_FLAG := 'LIFE_INSURANCE PROCESSING FEE WITH VAT';
+          DATA_VALUE:=ROUND(LIFE_IN_PROCESSING_FEE_CHARGES,3); 
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          --------20---------
+          DATA_FLAG := 'Loan PROPERTYFEE FEE';
+          DATA_VALUE:=PROPERTYFEE; 
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          --------21---------
+          DATA_FLAG := 'VALUATION FEE';
+          DATA_VALUE:=VALUATIONFEE;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ----22-----
+         DATA_FLAG := ' MULKIYA_TRANSFER FEE';
+         DATA_VALUE:=MULKIYA_TRANSFER; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        ----23-----
+         DATA_FLAG := 'Mortgage FEE';
+         DATA_VALUE:=Mortgage_FEE; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         -----24------
+
+         DATA_FLAG := 'Total_Amount_Paid_by_Customer';
+         Select SUM(EMI_AMOUNT) into DATA_VALUE from tbl_amoritization where SL_ID = amortizationID;
+         --DATA_VALUE:=ROUND(EMI*TO_NUMBER(REQUESTED_LOAN_TENOR),3); 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         ----------25-----------
+         DATA_FLAG := 'Valuation_Error';
+         DATA_VALUE:=VALUATIONFEE_ERROR; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         --------------26-----------
+          DATA_FLAG := 'Age_At_Maturity_Error';
+         DATA_VALUE:=Age_At_Maturity_Error; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         -----27-----------
+          DATA_FLAG := 'Mulkiya Transfer Fee Error';
+         DATA_VALUE:=mulkiya_transfer_error; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         ----------28---------------
+         DATA_FLAG := 'OTHER_FEES';
+         DATA_VALUE:=otherfees; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         -----------29-----------
+         DATA_FLAG := 'Maximum_Loan_Tenor';
+         DATA_VALUE:=MAX_LOAN_TENOR; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         --------30-------------------
+
+         DATA_FLAG := 'NET_AMOUNT';
+          IF(li_type ='Outside Cover')
+          THEN
+           DATA_VALUE:=ROUND(DISBURSED_LOAN_AMOUNT-ROUND(loan_Processing_FEE,3),3); 
+          ELSE
+           DATA_VALUE:=ROUND(DISBURSED_LOAN_AMOUNT-ROUND(LIFE_IN_PROCESSING_FEE_CHARGES,3)-ROUND(loan_Processing_FEE,3)-LIFE_INSURANCE,3); 
+          END IF;
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         --------31-------------------
+
+         DATA_FLAG := 'Amortization_ID';
+         DATA_VALUE:=amortizationID; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+
+         --------32-------------------
+
+         DATA_FLAG := 'EMI_START_DATE';
+         SELECT EMI_DUE_DATE INTO startDate FROM TBL_AMORITIZATION WHERE EMI_NO = '1' AND SL_ID = amortizationID;   
+         DATA_VALUE:=startDate;
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         --------33-------------------
+
+         DATA_FLAG := 'EMI_END_DATE';
+         SELECT EMI_DUE_DATE INTO DATA_VALUE FROM TBL_AMORITIZATION WHERE EMI_NO = (SELECT MAX(EMI_NO) FROM tbl_amoritization where SL_ID = amortizationID) AND SL_ID = amortizationID;    
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          --------34-------------------
+
+         DATA_FLAG := 'TOTAL_TENOR_PAID_BY_CUSTOMER';
+         SELECT EMI_NO INTO DATA_VALUE FROM TBL_AMORITIZATION WHERE EMI_NO = (SELECT MAX(EMI_NO) FROM tbl_amoritization where SL_ID = amortizationID) AND SL_ID = amortizationID;    
+                  INSERT into EMI_TEMP VALUES (DATA_FLAG,(DATA_VALUE));
+        --------35-------------------
+
+         DATA_FLAG := 'TOTAL_TENOR_INCLUDING_WAIVER';
+         SELECT EMI_DUE_DATE INTO lastDate FROM TBL_AMORITIZATION WHERE EMI_NO = (SELECT MAX(EMI_NO) FROM tbl_amoritization where SL_ID = amortizationID) AND SL_ID = amortizationID;  
+         DATA_VALUE:=MONTHS_BETWEEN(lastDate,startDate)+1;
+                  INSERT into EMI_TEMP VALUES (DATA_FLAG,(DATA_VALUE));
+
+
+        SP_INSERT_INTO_REQUESTORDATA_TABLE(CUSTOMER_NAME,NATIONAL_ID,MOBILE_NUMBER,EMAIL_ID,EMPLOYERNAME,CHANNEL_TYPE,DATE_OF_ENQUIRY,NATIONALITY,EMPLOYER_SEGMENT,DATE_OF_BIRTH,NET_SALARY,IS_EXISTING_LOAN,EXISTING_LOAN_AMOUNT,IS_EXISTING_LOAN_SETTLEMENT,EXISTINGLOAN_INSTALLMENT,PRODUCT,LOANTYPE,INTEREST_RATE,LOAN_REQUESTED,LI_PROCESSING_FEE,
+        LIFE_INSURANCE,IS_FIRST_BUY,LAND_VALUE,BUILDING_VALUE,ISMORTGAGE_FEE,ISMULKIYA_TRANSFER_FEE,ISVALUATION_FEE,ISPROPERTY_INSURANCE,VEHICLE_VALUE,SALARY_ASSIGNMENT,LIFE_IN_PROCESSING_FEE_CHARGES,DISBURSED_LOAN_AMOUNT,MAX_LOAN_TENOR,MAX_LOAN_AMOUNT,TOTAL_PROPERTY_VALUE,LOAN_AMOUNT_PER_PROPERTY_VALUE,AGE_ERROR,DBR_ERROR,LTV_ERROR,REQUESTED_LOAN_TENOR,EXISTING_LOAN_BANK,
+        ISEXCEPTION_CASE,LI_TYPE,ISPROCESSING_FEE,REINSTATE_VALUE,interest_serving_period_local,dbr,emi);
+
+        --------------------------------------------------------------------------------------------------
+        -----------------Completed If ALL WORKS WELL-----------
+        -------------------------------------------------------------------------------------------------------------------           
+    ELSE-----else of Disbursed amount >0
+    ------------1-------------
+        DATA_FLAG :='LIFE_IN_PROCESSING_FEE_CHARGES';
+        DATA_VALUE :='';
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        ------------2-------------
+        DATA_FLAG :='DISBURSED_LOAN_AMOUNT';
+        DATA_VALUE :='';
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        ------------3-------------
+        DATA_FLAG := 'MAX_LOAN_TENOR';
+        DATA_VALUE :='';
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        ------------4-------------
+        DATA_FLAG := 'MAX_LOAN_AMOUNT';
+        DATA_VALUE :=max_loan_amount;
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        ------------5-------------
+        DATA_FLAG := 'EMI';
+        DATA_VALUE :='';
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        ------------6-------------
+        DATA_FLAG := 'DBR%';
+        DATA_VALUE :='';
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        ------------7-------------
+        DATA_FLAG := 'Total_Property_Value%';
+          DATA_VALUE :='';
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ------------8-------------
+          DATA_FLAG := 'Loan_Amount_Per_Property_Value%';
+          DATA_VALUE :='';
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ------------9-------------
+          DATA_FLAG :='Age Error';
+          DATA_VALUE := Age_Error ;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ------------10-------------
+          DATA_FLAG :='DBR_Error';
+          DATA_VALUE := '';
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ------------11-------------
+          DATA_FLAG :='LTV_Error';
+          DATA_VALUE := LTV_Error;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ------------12-------------
+          DATA_FLAG :='Employee_Not_FOUND';
+          employee_found :='0';
+          SELECT COUNT(EMPLOYER_NAME) INTO employee_found FROM EMP_TABLE WHERE EMPLOYER_NAME = EMPLOYERNAME;
+          if(employee_found = 0)
+          THEN
+          DATA_VALUE :='Employer is not in the list , Please refer approval list';
+          ELSE
+          DATA_VALUE :='';
+          END IF;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          -----------13-------------
+           DATA_FLAG := 'REQUESTED_LOAN_TENOR_ERROR';
+          DATA_VALUE :=REQUESTED_LOAN_TENOR_ERROR;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ------------14--------
+           DATA_FLAG := 'Above_100K_Error';
+            if(DISBURSED_LOAN_AMOUNT>=100000)
+            THEN
+                DATA_VALUE:= 'Medical Examination Required(Loan is above RO100k)';
+            ELSE
+                DATA_VALUE:='';
+            END IF;
+            INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ------------15--------
+          DATA_FLAG:='Age_At_Maturity';
+          age_at_Maturity_syntax:=   trunc(months_between(lastDate,TO_DATE(DATE_OF_BIRTH))/12)||' Year(s) '
+                                      ||trunc(mod(months_between(lastDate,TO_DATE(DATE_OF_BIRTH)),12)) || ' Month(s) '
+                                      ||trunc(lastDate-add_months(TO_DATE(DATE_OF_BIRTH),trunc(months_between(lastDate,TO_DATE(DATE_OF_BIRTH))/12)*12+trunc(mod(months_between(lastDate,TO_DATE(DATE_OF_BIRTH)),12))))
+                                      || ' Day(s)';
+          DATA_VALUE :=age_at_Maturity_syntax;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ------------16--------
+          DATA_FLAG := 'Loan_Processing_FEE_With_VAT';
+          DATA_VALUE :=loan_Processing_FEE;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ----------17-------
+          DATA_FLAG := 'PROPERTY FEE';
+          DATA_VALUE:=PROPERTYFEE; 
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          --------18--------
+
+          DATA_FLAG := 'LIFE_INSURANCE_FEE_WITH_VAT';
+          DATA_VALUE:=LIFE_INSURANCE; 
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ---------------19---------
+          DATA_FLAG := 'LIFE_INSURANCE PROCESSING FEE WITH VAT';
+          DATA_VALUE:=LIFE_IN_PROCESSING_FEE_CHARGES; 
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          --------20--------
+          DATA_FLAG := 'Loan PROPERTYFEE FEE';
+          DATA_VALUE:=PROPERTYFEE; 
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          -------------21--------
+          DATA_FLAG := 'VALUATION FEE';
+          DATA_VALUE:=VALUATIONFEE;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          -------------22---------
+         DATA_FLAG := ' MULKIYA_TRANSFER FEE';
+         DATA_VALUE:=MULKIYA_TRANSFER; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        -----------23----------
+         DATA_FLAG := 'Mortgage FEE';
+         DATA_VALUE:=Mortgage_FEE; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         ----------------24-----------
+          DATA_FLAG := 'Total_Amount_Paid_by_Customer';
+         DATA_VALUE:=ROUND(EMI*Loan_Tenor,3); 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         --------25------------
+         DATA_FLAG := 'Valuation_Error';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         -----------26-------
+          DATA_FLAG := 'Age_At_Maturity_Error';
+         DATA_VALUE:=Age_At_Maturity_Error; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+           ------27------------      
+         DATA_FLAG := 'Mulkiya Transfer Fee Error';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ------28------------ 
+         DATA_FLAG := 'OTHER_FEES';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         -----------29-----------
+         DATA_FLAG := 'Maximum_Loan_Tenor';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         --------30-------------------
+
+         DATA_FLAG := 'NET_AMOUNT';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          --------31-------------------
+         DATA_FLAG := 'Amortization_ID';
+         DATA_VALUE:=amortizationID; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         --------32-------------------
+         DATA_FLAG := 'EMI_START_DATE';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         --------33-----------------
+         DATA_FLAG := 'EMI_END_DATE';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          --------34-------------------
+
+         DATA_FLAG := 'TOTAL_TENOR_PAID_BY_CUSTOMER';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,(DATA_VALUE));
+
+                  --------35-------------------
+
+         DATA_FLAG := 'TOTAL_TENOR_INCLUDING_WAIVER';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+
+   END IF;----end of DISBURSED_LOAN_AMOUNT>0
+
+
+ ELSE-----else of Disbursed amount >0
+        --------1-----------
+        DATA_FLAG :='LIFE_IN_PROCESSING_FEE_CHARGES';
+        DATA_VALUE :='';
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        --------------2--------
+        DATA_FLAG :='DISBURSED_LOAN_AMOUNT';
+        DATA_VALUE :='';
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        --------------3--------
+        DATA_FLAG := 'MAX_LOAN_TENOR';
+        DATA_VALUE :='';
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        --------------4--------
+        DATA_FLAG := 'MAX_LOAN_AMOUNT';
+        DATA_VALUE :=max_loan_amount;
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        --------------5--------
+        DATA_FLAG := 'EMI';
+        DATA_VALUE :='';
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        --------------6--------
+        DATA_FLAG := 'DBR%';
+        DATA_VALUE :='';
+        INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        --------------7--------
+        DATA_FLAG := 'Total_Property_Value%';
+          DATA_VALUE :='';
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          --------------8--------
+          DATA_FLAG := 'Loan_Amount_Per_Property_Value%';
+          DATA_VALUE :='';
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          --------------9--------
+          DATA_FLAG :='Age Error';
+          DATA_VALUE := Age_Error ;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ---10-----------
+          DATA_FLAG :='DBR_Error';
+          DATA_VALUE := '';
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          -------------11--------
+          DATA_FLAG :='LTV_Error';
+          DATA_VALUE := LTV_Error;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          --------------12--------
+          DATA_FLAG :='Employee_Not_FOUND';
+          employee_found :=0;
+          SELECT COUNT(EMPLOYER_NAME) INTO employee_found FROM EMP_TABLE WHERE EMPLOYER_NAME = EMPLOYERNAME;
+          if(employee_found = 0)
+          THEN
+          DATA_VALUE :='Employer is not in the list , Please refer approval list';
+          ELSE
+          DATA_VALUE :='';
+          END IF;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+            ------------13-------      
+           DATA_FLAG := 'REQUESTED_LOAN_TENOR_ERROR';
+          DATA_VALUE :=REQUESTED_LOAN_TENOR_ERROR;
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          -------14-----------
+           DATA_FLAG := 'Above_100K_Error';
+            if(DISBURSED_LOAN_AMOUNT>=100000)
+            THEN
+                DATA_VALUE:= 'Medical Examination Required(Loan is above RO100k)';
+            ELSE
+                DATA_VALUE:='';
+            END IF;
+            INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+            -----15------
+          DATA_FLAG:='Age_At_Maturity';
+          DATA_VALUE :=ROUND(Age_At_Maturity,3);
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          -----16-----------
+          DATA_FLAG := 'Loan_Processing_FEE_With_VAT';
+          DATA_VALUE :='';
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          -----17-------------
+          DATA_FLAG := 'PROPERTY FEE';
+          DATA_VALUE:=''; 
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         ----------18-------
+          DATA_FLAG := 'LIFE_INSURANCE_FEE_WITH_VAT';
+          DATA_VALUE:=''; 
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ------------19--------
+          DATA_FLAG := 'LIFE_INSURANCE PROCESSING FEE WITH VAT';
+          DATA_VALUE:=''; 
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ------------20--------
+          DATA_FLAG := 'Loan PROPERTYFEE FEE';
+          DATA_VALUE:=''; 
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ------------21---------
+          DATA_FLAG := 'VALUATION FEE';
+          DATA_VALUE:='';
+          INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          ----------22--------
+         DATA_FLAG := ' MULKIYA_TRANSFER FEE';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+        ------------23-----------
+         DATA_FLAG := 'Mortgage FEE';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         ---------24----------
+          DATA_FLAG := 'Total_Amount_Paid_by_Customer';
+         DATA_VALUE:=ROUND(EMI*Loan_Tenor,3); 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         ---------------25-------
+         DATA_FLAG := 'Valuation_Error';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         ---------------26--------------
+          DATA_FLAG := 'Age_At_Maturity_Error';
+         DATA_VALUE:=Age_At_Maturity_Error; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         -------27------
+          DATA_FLAG := 'Mulkiya Transfer Fee Error';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         -------28------
+         DATA_FLAG := 'OTHER_FEES';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         -----------29-----------
+         DATA_FLAG := 'Maximum_Loan_Tenor';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         --------30-------------------
+
+         DATA_FLAG := 'NET_AMOUNT';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          --------31-------------------
+         DATA_FLAG := 'Amortization_ID';
+         DATA_VALUE:=amortizationID; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         --------32-------------------
+         DATA_FLAG := 'EMI_START_DATE';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+         --------33-----------------
+         DATA_FLAG := 'EMI_END_DATE';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+          --------34-------------------
+
+         DATA_FLAG := 'TOTAL_TENOR_PAID_BY_CUSTOMER';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+
+         --------35-------------------
+
+         DATA_FLAG := 'TOTAL_TENOR_INCLUDING_WAIVER';
+         DATA_VALUE:=''; 
+         INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+
+ END IF;---END OF tempvaluess>0
+
+
+        OPEN RESULT for  select DATA_FLAG,DATA_VALUE from EMI_TEMP;    
+          EXECUTE IMMEDIATE 'DELETE  EMI_TEMP';
+
+EXCEPTION
+       WHEN NO_DATA_FOUND THEN
+       DATA_FLAG := 'Data Not foound%';
+       DATA_VALUE :='Data Not Found';
+       INSERT into EMI_TEMP VALUES (DATA_FLAG,DATA_VALUE);
+       OPEN RESULT for  select DATA_FLAG,DATA_VALUE from EMI_TEMP;
+
+       EXECUTE IMMEDIATE 'DELETE  EMI_TEMP';    
+
+END;
