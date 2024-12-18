@@ -29,13 +29,24 @@ CREATE OR REPLACE PROCEDURE USP_MANAGE_PL_LOAN_REQUEST
     PARAM4 VARCHAR2,
     PARAM5 VARCHAR2,
     PARAM6 VARCHAR2,
-    P_LOAN_ACCOUNT_NUMBERS VARCHAR2 -- Updated to VARCHAR2
+    P_LOAN_ACCOUNT_NUMBERS VARCHAR2, -- Updated to VARCHAR2
+    P_STATUS OUT NUMBER -- Output parameter to indicate success/failure
 )
 AS
     v_loan_account_number VARCHAR2(50);
     v_index               PLS_INTEGER := 1;
     v_delimiter           CONSTANT VARCHAR2(1) := ','; -- Delimiter for splitting
 BEGIN
+    -- Validate mandatory fields
+    IF P_CIF IS NULL OR
+       P_CIVIL IS NULL OR
+       P_APPLICATION_NUMBER IS NULL OR
+       P_LOAN_ACCOUNT_NUMBERS IS NULL THEN
+        P_STATUS := 1; -- Failure due to missing mandatory fields
+        DBMS_OUTPUT.PUT_LINE('Mandatory fields are missing.');
+        RETURN;
+    END IF;
+
     -- Insert into TBL_FACILITY_MB
     INSERT INTO sibawdb.TBL_FACILITY_MB(
         CIF,
@@ -110,6 +121,14 @@ BEGIN
         v_index := INSTR(P_LOAN_ACCOUNT_NUMBERS || v_delimiter, v_delimiter, v_index) + 1;
     END LOOP;
 
+    -- Commit transaction
     COMMIT;
+    P_STATUS := 0; -- Success
     DBMS_OUTPUT.PUT_LINE('All account numbers processed successfully.');
+
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        P_STATUS := 1; -- Failure due to exception
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
 END;
