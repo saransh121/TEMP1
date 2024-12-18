@@ -30,20 +30,39 @@ CREATE OR REPLACE PROCEDURE USP_MANAGE_PL_LOAN_REQUEST
     PARAM5 VARCHAR2,
     PARAM6 VARCHAR2,
     P_LOAN_ACCOUNT_NUMBERS VARCHAR2, -- Updated to VARCHAR2
-    P_STATUS OUT NUMBER -- Output parameter to indicate success/failure
+    P_STATUS OUT NUMBER, -- Output parameter to indicate success/failure
+    P_MESSAGE OUT VARCHAR2 -- Output parameter to indicate what is missing
 )
 AS
     v_loan_account_number VARCHAR2(50);
     v_index               PLS_INTEGER := 1;
     v_delimiter           CONSTANT VARCHAR2(1) := ','; -- Delimiter for splitting
+    v_missing_fields      VARCHAR2(4000);
 BEGIN
-    -- Validate mandatory fields
-    IF P_CIF IS NULL OR
-       P_CIVIL IS NULL OR
-       P_APPLICATION_NUMBER IS NULL OR
-       P_LOAN_ACCOUNT_NUMBERS IS NULL THEN
-        P_STATUS := 1; -- Failure due to missing mandatory fields
-        DBMS_OUTPUT.PUT_LINE('Mandatory fields are missing.');
+    -- Check for mandatory fields
+    v_missing_fields := '';
+
+    IF P_CIF IS NULL THEN
+        v_missing_fields := v_missing_fields || 'CIF, ';
+    END IF;
+
+    IF P_CIVIL IS NULL THEN
+        v_missing_fields := v_missing_fields || 'CIVIL, ';
+    END IF;
+
+    IF P_APPLICATION_NUMBER IS NULL THEN
+        v_missing_fields := v_missing_fields || 'APPLICATION_NUMBER, ';
+    END IF;
+
+    IF P_LOAN_ACCOUNT_NUMBERS IS NULL THEN
+        v_missing_fields := v_missing_fields || 'LOAN_ACCOUNT_NUMBERS, ';
+    END IF;
+
+    -- If any mandatory fields are missing, set the status and message
+    IF v_missing_fields IS NOT NULL THEN
+        P_STATUS := 1; -- Failure
+        P_MESSAGE := 'Mandatory fields missing: ' || RTRIM(v_missing_fields, ', ');
+        DBMS_OUTPUT.PUT_LINE(P_MESSAGE);
         RETURN;
     END IF;
 
@@ -124,11 +143,13 @@ BEGIN
     -- Commit transaction
     COMMIT;
     P_STATUS := 0; -- Success
-    DBMS_OUTPUT.PUT_LINE('All account numbers processed successfully.');
+    P_MESSAGE := 'All records inserted successfully.';
+    DBMS_OUTPUT.PUT_LINE(P_MESSAGE);
 
 EXCEPTION
     WHEN OTHERS THEN
         ROLLBACK;
-        P_STATUS := 1; -- Failure due to exception
-        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+        P_STATUS := 1; -- Failure
+        P_MESSAGE := 'An error occurred: ' || SQLERRM;
+        DBMS_OUTPUT.PUT_LINE(P_MESSAGE);
 END;
