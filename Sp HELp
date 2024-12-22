@@ -1,4 +1,4 @@
-create or replace PROCEDURE SP_INSERT_DIGITAL_LOAN_QUEUE (
+CREATE OR REPLACE PROCEDURE SP_INSERT_DIGITAL_LOAN_QUEUE (
     P_CRE_BRANCH_CODE         VARCHAR2,
     P_CRE_BRANCH_NAME         VARCHAR2,
     P_APPLICATION_NUMBER      VARCHAR2,
@@ -12,9 +12,48 @@ create or replace PROCEDURE SP_INSERT_DIGITAL_LOAN_QUEUE (
     P_GROSSINCOME             VARCHAR2,
     P_LOAN_AMOUNT_REQUESTED   VARCHAR2,
     P_TENURE                  VARCHAR2,
-    P_LOAN_ACCOUNT_NUMBERS    VARCHAR2
+    P_LOAN_ACCOUNT_NUMBERS    VARCHAR2,
+    P_STATUS                  OUT NUMBER, -- Output to indicate success/failure
+    P_MESSAGE                 OUT VARCHAR2 -- Output to provide details
 ) AS
+    v_missing_fields VARCHAR2(4000);
 BEGIN
+    -- Validate mandatory fields
+    v_missing_fields := '';
+
+    IF P_CRE_BRANCH_CODE IS NULL THEN
+        v_missing_fields := v_missing_fields || 'CRE_BRANCH_CODE, ';
+    END IF;
+
+    IF P_CRE_BRANCH_NAME IS NULL THEN
+        v_missing_fields := v_missing_fields || 'CRE_BRANCH_NAME, ';
+    END IF;
+
+    IF P_APPLICATION_NUMBER IS NULL THEN
+        v_missing_fields := v_missing_fields || 'APPLICATION_NUMBER, ';
+    END IF;
+
+    IF P_CIF_ID IS NULL THEN
+        v_missing_fields := v_missing_fields || 'CIF_ID, ';
+    END IF;
+
+    IF P_CIVIL_ID IS NULL THEN
+        v_missing_fields := v_missing_fields || 'CIVIL_ID, ';
+    END IF;
+
+    IF P_PURPOSE_OF_LOAN IS NULL THEN
+        v_missing_fields := v_missing_fields || 'PURPOSE_OF_LOAN, ';
+    END IF;
+
+    -- If any mandatory fields are missing, set status and return
+    IF v_missing_fields IS NOT NULL THEN
+        P_STATUS := 1; -- Failure
+        P_MESSAGE := 'Mandatory fields missing: ' || RTRIM(v_missing_fields, ', ');
+        DBMS_OUTPUT.PUT_LINE(P_MESSAGE);
+        RETURN;
+    END IF;
+
+    -- Insert data into the TBL_DIGITAL_LOAN_QUEUE table
     INSERT INTO sibawdb.TBL_DIGITAL_LOAN_QUEUE (
         CRE_BRANCH_CODE,
         CRE_BRANCH_NAME,
@@ -51,9 +90,19 @@ BEGIN
         P_LOAN_ACCOUNT_NUMBERS
     );
 
-    COMMIT; -- Commit the transaction to save changes
+    -- Commit the transaction
+    COMMIT;
+
+    -- Set success status and message
+    P_STATUS := 0; -- Success
+    P_MESSAGE := 'Record inserted successfully.';
+    DBMS_OUTPUT.PUT_LINE(P_MESSAGE);
+
 EXCEPTION
     WHEN OTHERS THEN
-        ROLLBACK; -- Rollback in case of an error
-        RAISE; -- Re-raise the exception
+        -- Handle exceptions, rollback, and set error message
+        ROLLBACK;
+        P_STATUS := 1; -- Failure
+        P_MESSAGE := 'An error occurred: ' || SQLERRM;
+        DBMS_OUTPUT.PUT_LINE(P_MESSAGE);
 END SP_INSERT_DIGITAL_LOAN_QUEUE;
