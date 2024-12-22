@@ -1,155 +1,59 @@
-CREATE OR REPLACE PROCEDURE USP_MANAGE_PL_LOAN_REQUEST
-(
-    P_CIF VARCHAR2,
-    P_CIVIL VARCHAR2,
-    P_TENUREWITHWAIVER VARCHAR2,
-    P_LOANSCHEMECODE VARCHAR2,
-    P_OPERATIVEACCTBRANCHCODE VARCHAR2,
-    P_OPERATIVEACCTSCHEMECODE VARCHAR2,
-    P_OPERATIVEACCTSCHEMETYPE VARCHAR2,
-    P_OPERATIVEACCOUNT VARCHAR2,
-    P_EMI VARCHAR2,
-    P_DISBURSEDAMOUNT VARCHAR2,
-    P_INTERESTRATE VARCHAR2,
-    P_SPECIALINTERESTRATE VARCHAR2,
-    P_LIFEINSURANCETYPE VARCHAR2,
-    P_TYPEOFLOAN VARCHAR2,
-    P_REPAYMENTSTARTSAFTER VARCHAR2,
-    P_PURPOSEOFADAVANCE VARCHAR2,
-    P_CUSTOMERNAME VARCHAR2,
-    P_PROCESSINGFEE VARCHAR2,
-    P_INSURANCEAMOUNT VARCHAR2,
-    P_INSURANCEADMINFEE VARCHAR2,
-    P_APPLICATION_NUMBER VARCHAR2,
-    P_LOAN_ACCOUNT_NUMBER VARCHAR2,
-    P_OD_ACCOUNT_NUMBER VARCHAR2,
-    PARAM1 VARCHAR2,
-    PARAM2 VARCHAR2,
-    PARAM3 VARCHAR2,
-    PARAM4 VARCHAR2,
-    PARAM5 VARCHAR2,
-    PARAM6 VARCHAR2,
-    P_LOAN_ACCOUNT_NUMBERS VARCHAR2, -- Updated to VARCHAR2
-    P_STATUS OUT NUMBER, -- Output parameter to indicate success/failure
-    P_MESSAGE OUT VARCHAR2 -- Output parameter to indicate what is missing
-)
-AS
-    v_loan_account_number VARCHAR2(50);
-    v_index               PLS_INTEGER := 1;
-    v_delimiter           CONSTANT VARCHAR2(1) := ','; -- Delimiter for splitting
-    v_missing_fields      VARCHAR2(4000);
+create or replace PROCEDURE SP_INSERT_DIGITAL_LOAN_QUEUE (
+    P_CRE_BRANCH_CODE         VARCHAR2,
+    P_CRE_BRANCH_NAME         VARCHAR2,
+    P_APPLICATION_NUMBER      VARCHAR2,
+    P_CIF_ID                  VARCHAR2,
+    P_CIVIL_ID                VARCHAR2,
+    P_PURPOSE_OF_LOAN         VARCHAR2,
+    P_HEIGHT                  VARCHAR2,
+    P_WEIGHT                  VARCHAR2,
+    P_JOB_TITLE               VARCHAR2,
+    P_OCCUPATION              VARCHAR2,
+    P_GROSSINCOME             VARCHAR2,
+    P_LOAN_AMOUNT_REQUESTED   VARCHAR2,
+    P_TENURE                  VARCHAR2,
+    P_LOAN_ACCOUNT_NUMBERS    VARCHAR2
+) AS
 BEGIN
-    -- Check for mandatory fields
-    v_missing_fields := '';
-
-    IF P_CIF IS NULL THEN
-        v_missing_fields := v_missing_fields || 'CIF, ';
-    END IF;
-
-    IF P_CIVIL IS NULL THEN
-        v_missing_fields := v_missing_fields || 'CIVIL, ';
-    END IF;
-
-    IF P_APPLICATION_NUMBER IS NULL THEN
-        v_missing_fields := v_missing_fields || 'APPLICATION_NUMBER, ';
-    END IF;
-
-    IF P_LOAN_ACCOUNT_NUMBERS IS NULL THEN
-        v_missing_fields := v_missing_fields || 'LOAN_ACCOUNT_NUMBERS, ';
-    END IF;
-
-    -- If any mandatory fields are missing, set the status and message
-    IF v_missing_fields IS NOT NULL THEN
-        P_STATUS := 1; -- Failure
-        P_MESSAGE := 'Mandatory fields missing: ' || RTRIM(v_missing_fields, ', ');
-        DBMS_OUTPUT.PUT_LINE(P_MESSAGE);
-        RETURN;
-    END IF;
-
-    -- Insert into TBL_FACILITY_MB
-    INSERT INTO sibawdb.TBL_FACILITY_MB(
-        CIF,
-        CIVIL,
-        TENUREWITHWAIVER,
-        LOANSCHEMECODE,
-        OPERATIVEACCTBRANCHCODE,
-        OPERATIVEACCTSCHEMECODE,
-        OPERATIVEACCTSCHEMETYPE,
-        OPERATIVEACCOUNT,
-        EMI,
-        DISBURSEDAMOUNT,
-        INTERESTRATE,
-        SPECIALINTERESTRATE,
-        LIFEINSURANCETYPE,
-        TYPEOFLOAN,
-        REPAYMENTSTARTSAFTER,
-        PURPOSEOFADAVANCE,
-        CUSTOMERNAME,
-        PROCESSINGFEE,
-        INSURANCEAMOUNT,
-        INSURANCEADMINFEE,
+    INSERT INTO sibawdb.TBL_DIGITAL_LOAN_QUEUE (
+        CRE_BRANCH_CODE,
+        CRE_BRANCH_NAME,
         APPLICATION_NUMBER,
-        LOAN_ACCOUNT_NUMBER,
-        OD_ACCOUNT_NUMBER
-    )
-    VALUES (
-        P_CIF,
-        P_CIVIL,
-        P_TENUREWITHWAIVER,
-        P_LOANSCHEMECODE,
-        P_OPERATIVEACCTBRANCHCODE,
-        P_OPERATIVEACCTSCHEMECODE,
-        P_OPERATIVEACCTSCHEMETYPE,
-        P_OPERATIVEACCOUNT,
-        P_EMI,
-        P_DISBURSEDAMOUNT,
-        P_INTERESTRATE,
-        P_SPECIALINTERESTRATE,
-        P_LIFEINSURANCETYPE,
-        P_TYPEOFLOAN,
-        P_REPAYMENTSTARTSAFTER,
-        P_PURPOSEOFADAVANCE,
-        P_CUSTOMERNAME,
-        P_PROCESSINGFEE,
-        P_INSURANCEAMOUNT,
-        P_INSURANCEADMINFEE,
+        SEARCHPARAMETERFORLAUNCHING,
+        STATUS,
+        CIF_ID,
+        CIVIL_ID,
+        PURPOSE_OF_LOAN,
+        HEIGHT,
+        WEIGHT,
+        JOB_TITLE,
+        OCCUPATION,
+        GROSSINCOME,
+        LOAN_AMOUNT_REQUESTED,
+        TENURE,
+        LOAN_ACCOUNT_NUMBERS
+    ) VALUES (
+        P_CRE_BRANCH_CODE,
+        P_CRE_BRANCH_NAME,
         P_APPLICATION_NUMBER,
-        P_LOAN_ACCOUNT_NUMBER,
-        P_OD_ACCOUNT_NUMBER
+        'CIF',
+        'NEW',
+        P_CIF_ID,
+        P_CIVIL_ID,
+        P_PURPOSE_OF_LOAN,
+        P_HEIGHT,
+        P_WEIGHT,
+        P_JOB_TITLE,
+        P_OCCUPATION,
+        P_GROSSINCOME,
+        P_LOAN_AMOUNT_REQUESTED,
+        P_TENURE,
+        P_LOAN_ACCOUNT_NUMBERS
     );
 
-    -- Loop through the delimited string
-    WHILE v_index <= LENGTH(P_LOAN_ACCOUNT_NUMBERS) LOOP
-        v_loan_account_number := SUBSTR(
-            P_LOAN_ACCOUNT_NUMBERS,
-            v_index,
-            INSTR(P_LOAN_ACCOUNT_NUMBERS || v_delimiter, v_delimiter, v_index) - v_index
-        );
-        
-        -- Insert into TBL_LOAN_ACCOUNT_NUMBER_MB
-        INSERT INTO sibawdb.TBL_LOAN_ACCOUNT_NUMBER_MB (
-            APPLICATION_NUMBER,
-            LOAN_ACCOUNT_NUMBER
-        )
-        VALUES (
-            P_APPLICATION_NUMBER,
-            v_loan_account_number
-        );
-        
-        -- Move to the next account number
-        v_index := INSTR(P_LOAN_ACCOUNT_NUMBERS || v_delimiter, v_delimiter, v_index) + 1;
-    END LOOP;
-
-    -- Commit transaction
-    COMMIT;
-    P_STATUS := 0; -- Success
-    P_MESSAGE := 'All records inserted successfully.';
-    DBMS_OUTPUT.PUT_LINE(P_MESSAGE);
-
+    COMMIT; -- Commit the transaction to save changes
 EXCEPTION
     WHEN OTHERS THEN
-        ROLLBACK;
-        P_STATUS := 1; -- Failure
-        P_MESSAGE := 'An error occurred: ' || SQLERRM;
-        DBMS_OUTPUT.PUT_LINE(P_MESSAGE);
-END;
+        ROLLBACK; -- Rollback in case of an error
+        RAISE; -- Re-raise the exception
+END SP_INSERT_DIGITAL_LOAN_QUEUE;
