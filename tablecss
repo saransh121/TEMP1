@@ -1,0 +1,54 @@
+/* General Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    margin: 20px 0;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Table Header */
+table th {
+    background-color: #007BFF; /* Replace with your desired header color */
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+/* Table Rows */
+table td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+/* Alternate Row Colors */
+table tr:nth-child(even) {
+    background-color: #f9f9f9; /* Light gray for even rows */
+}
+
+table tr:nth-child(odd) {
+    background-color: #ffffff; /* White for odd rows */
+}
+
+/* Highlight Hover Row */
+table tr:hover {
+    background-color: #f1f1f1; /* Slightly darker gray on hover */
+}
+
+/* Table Footer Styling (if any) */
+tfoot {
+    background-color: #007BFF; /* Match header */
+    color: white;
+    font-weight: bold;
+}
+
+/* Optional: Add Borders/Highlights to Specific Columns */
+table td:first-child {
+    font-weight: bold;
+    background-color: #f0f8ff; /* Light blue */
+}
