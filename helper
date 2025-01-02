@@ -1,0 +1,14 @@
+function setHighlightBtnLogic() {
+    const buttons = document.querySelectorAll('.highlight-btn button');
+    buttons.forEach(button => {
+        button.addEventListener('click', function () {
+            // Reset the color of all buttons to their default state
+            buttons.forEach(btn => {
+                document.getElementById(btn.id).style.color = '';
+            });
+
+            // Highlight the clicked button
+            document.getElementById(this.id).style.color = 'orange';
+        });
+    });
+}
