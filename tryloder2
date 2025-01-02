@@ -7,12 +7,25 @@
   <style>
     body {
       margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Disable user interactions on body when loader is active */
+    body.loading {
+      overflow: hidden;
+    }
+
+    .loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      background-color: #f5f5f5;
-      font-family: Arial, sans-serif;
+      z-index: 9999;
     }
 
     .loader {
@@ -64,13 +77,40 @@
         transform: rotate(360deg);
       }
     }
+
+    /* Content to demonstrate functionality */
+    .content {
+      display: none;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .content.active {
+      display: block;
+    }
   </style>
 </head>
-<body>
-  <div class="loader">
-    <div class="arc"></div>
-    <div class="arc orange"></div>
-    <div class="line"></div>
+<body class="loading">
+  <div class="loader-overlay">
+    <div class="loader">
+      <div class="arc"></div>
+      <div class="arc orange"></div>
+      <div class="line"></div>
+    </div>
   </div>
+
+  <div class="content">
+    <h1>Welcome to Sohar-Inspired Loader Demo</h1>
+    <p>You can now interact with the content.</p>
+  </div>
+
+  <script>
+    // Simulate loader completion after 3 seconds
+    setTimeout(() => {
+      document.querySelector('.loader-overlay').style.display = 'none'; // Hide loader
+      document.body.classList.remove('loading'); // Re-enable scrolling and interactions
+      document.querySelector('.content').classList.add('active'); // Show content
+    }, 3000);
+  </script>
 </body>
 </html>
