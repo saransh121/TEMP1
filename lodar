@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loader</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="loader-container">
+    <div class="circle"></div>
+    <div class="waves">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+</body>
+</html>
+
+
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f5f5f5; /* Light background */
+  font-family: Arial, sans-serif;
+}
+
+.loader-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+.circle {
+  width: 80px;
+  height: 80px;
+  border: 6px solid #0059b3; /* Inspired by Sohar's primary blue */
+  border-top: 6px solid #ffa500; /* Contrast color */
+  border-radius: 50%;
+  animation: spin 1.5s linear infinite;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.waves {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.waves span {
+  display: block;
+  width: 15px;
+  height: 15px;
+  background-color: #ffa500;
+  border-radius: 50%;
+  animation: wave 1s infinite ease-in-out;
+}
+
+.waves span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.waves span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-15px);
+    opacity: 0.7;
+  }
+}
